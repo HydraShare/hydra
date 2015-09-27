@@ -32,12 +32,37 @@
 	</div>
 
 <script type="text/javascript">
+    
     // read all the available example files
     var formatDate = d3.time.format("%B %-d, %Y"),
         parseDate = d3.time.format.iso.parse,
         page = 0,
         fetching,
-        id;
+        id,
+        keywords = [];
+
+    // read uri
+
+    function parseUri(){
+    
+        var inputParameters = {
+            keywords : []
+        }
+        
+        // parse Uri
+        var pars = window.location.search.replace("?","").split("&")
+        
+        if (pars[0]=="")return;
+
+        pars.forEach(function(d){
+            keyValue = d.split("=");
+            inputParameters[keyValue[0].toLowerCase()].push(keyValue[1]);
+        })
+
+        keywords = inputParameters.keywords;
+    }
+
+    parseUri();
 
     function getSamples(){
         var members = {};
@@ -87,6 +112,8 @@
                             // I couldn't get the call back to work and that's why this is here!
                             // It needs to be changed later!
                             display(samplesData);
+                            // in case user passed a keyword in uri
+                            filter(keywords);
                         });
                     }
                 });
@@ -130,25 +157,29 @@
 
 	// script to filter examples
     d3.select("#filterButton")
-        .on("click", filter);
+        .on("click", filter(getKeywords()));
 
 
     d3.select('#filtering').on("keypress", function(e){
         if (!e) e = window.event;
-        if (e.keyCode == '13') filter();
+        if (e.keyCode == '13') filter(getKeywords());
       });
 
+    function getKeywords(){
+        return d3.select("#filtering").node().value.split(",");
+    }
 
-    function filter(){
+    function filter(keywords){
+        
         // visibility: hidden; position: fixed
-        var keywords = d3.select("#filtering").node().value.split(",");
         var exampledivs = d3.selectAll(".example");
         
         // turn everything on
         exampledivs.style("visibility","visible")
             .style("position","");
 
-        if (keywords.length==1 & keywords[0]=="") return; // no keyword!
+        if (keywords.length==0 || (keywords.length==1 & keywords[0]=="")) return; // no keyword!
+
 
         // map the values
         var isIncluded = {};
