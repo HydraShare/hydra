@@ -135,3 +135,58 @@ aside,
 .javascript .special {
   color: #e6550d;
 }
+
+a.example {
+  background-position: 50% 0%;
+  border: solid 1px #eee;
+  border-bottom: solid 1px #ccc;
+  box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  display: inline-block;
+  float: left;
+  height: 82px;
+  line-height: normal;
+  margin: 0 10px 10px 0;
+  position: relative;
+  text-shadow: 1px 1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, -1px -1px 0 #fff;
+  transition: ease 750ms background-position;
+  -webkit-transition: ease 750ms background-position;
+  -moz-transition: ease 750ms background-position;
+  -ms-transition: ease 750ms background-position;
+  -o-transition: ease 750ms background-position;
+  width: 232px;
+}
+
+a.example:nth-child(4n) {
+  margin-right: 0;
+}
+
+a.example:hover,
+a.example:focus {
+  background-color: #eee;
+  background-position: 50% 100%;
+  text-decoration: none;
+}
+
+a.example .description,
+a.example .date {
+  position: absolute;
+  padding: 10px;
+  z-index: 2;
+}
+
+a.example .description {
+  top: 0;
+  color: #000;
+}
+
+a.example .date {
+  display: none;
+}
+
+a.example:hover .description {
+  text-decoration: underline;
+}

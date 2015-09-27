@@ -4,120 +4,32 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<style>
-
-    @import url("lib/style1.css");
-
-    h2 {
-      color: #555;
-    }
-
-    a.user-login {
-      color: #000;
-    }
-
-    a.gist {
-      background-position: 50% 0%;
-      border: solid 1px #eee;
-      border-bottom: solid 1px #ccc;
-      box-sizing: border-box;
-      -o-box-sizing: border-box;
-      -moz-box-sizing: border-box;
-      -ms-box-sizing: border-box;
-      -webkit-box-sizing: border-box;
-      display: inline-block;
-      float: left;
-      height: 82px;
-      line-height: normal;
-      margin: 0 10px 10px 0;
-      position: relative;
-      text-shadow: 1px 1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, -1px -1px 0 #fff;
-      transition: ease 750ms background-position;
-      -webkit-transition: ease 750ms background-position;
-      -moz-transition: ease 750ms background-position;
-      -ms-transition: ease 750ms background-position;
-      -o-transition: ease 750ms background-position;
-      width: 232px;
-    }
-
-    a.gist:nth-child(4n) {
-      margin-right: 0;
-    }
-
-    a.gist:hover,
-    a.gist:focus {
-      background-color: #eee;
-      background-position: 50% 100%;
-      text-decoration: none;
-    }
-
-    a.gist .description,
-    a.gist .date {
-      position: absolute;
-      padding: 10px;
-      z-index: 2;
-    }
-
-    a.gist .description {
-      top: 0;
-      color: #000;
-    }
-
-    a.gist .date {
-      display: none;
-    }
-
-    a.gist:hover .description {
-      text-decoration: underline;
-    }
-
-    .date {
-      color: #636363;
-      display: block;
-      font-size: smaller;
-    }
-
-</style>
-
-<header>
-    Inspired by <a href="/">bl.ocks.org</a>
-    <div style="float:right">    
-        <input type="text" id="filtering" placeholder="username, component name,&hellip;">
-        <button id="filterButton" type="button">Filter!</button>
-    </div>
-</header>
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="mostapha roudsari" content="">
-
-    <title>Hydra - Sharing platform for Grasshopper and Dynamo users</title>
-    
-    <link rel="shortcut icon" href="">
-    <link rel="icon" type="image/png" href="">
-
-    <script src="./lib/d3.min.js" charset="utf-8"></script>
-
+	<meta charset="utf-8">
+	<title>Hydra - Sharing platform for Grasshopper and Dynamo users</title>
+	<link rel="icon" type="image/x-icon" href="./lib/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="./lib/style.css">
+    <script src="./lib/d3.min.js"></script>
 </head>
 
-
-<h2 class="user-login" title="Click on images for more information"> Welcome to Hydra! Click on images for more information </h2>
-
-<div class="gists">
-  <br clear="both">
-  <div class="loading">Loading; one moment please...</div>
-</div>
-
-<footer>
-  <br>
-  Do you want to share your files with the world! <a href="https://github.com/HydraShare/hydra/wiki"> Read here. We made it very easy for you. </a>
-</footer>
-
 <body>
+	<header>
+		<p>Inspired by <a href="http://bl.ocks.org/">bl.ocks.org</a></p>
+		<p>Do you want to share your files with the world? <a href="https://github.com/HydraShare/hydra/wiki">Read here. We made it very easy for you.</a></p>
+	</header>
+	<h2 class="user-login" title="Click on images for more information">Welcome to Hydra! Click on images for more information
+		<span style="float:right">
+			<input type="text" id="filtering" placeholder="username, component name,&hellip;">
+			<button id="filterButton" type="button">Filter!</button>
+		</span>
+	</h2>
+	<div class="examples">
+	  <br clear="both">
+	  <div class="loading">Loading; one moment please...</div>
+	</div>
 
 <script type="text/javascript">
     // read all the available example files
@@ -129,21 +41,19 @@
 
     function getSamples(){
         var members = {};
+		
         // here is a json object of all Hydra forks
         var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
 
         d3.json(forks, function(error, data){
             // find all the forks and member names
             data.forEach(function(d){
-                        // add each member with url to their fork        
-                        members[d.owner.login]= d.owner.html_url;
-                });
-
+                // add each member with url to their fork        
+                members[d.owner.login]= d.owner.html_url;
+            });
             getContents(members, display);
-        
         });
-    }
-
+    };
 
     function getContents(members, display){
 
@@ -162,12 +72,10 @@
                     // add each member with url to their fork        
                     if(content.type=="dir"){
                         
-                        // parse folder contents
-                        // create the path to json file
+                        // parse folder contents and create path to json file
                         var jsonFile = "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/input.json";
                         
                         d3.json(jsonFile, function(error, data){
-                            
                             var sample = {
                                 "owner" : member,
                                 "id": content.name,
@@ -175,120 +83,77 @@
                                 "thumbnail": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" + data.thumbnail,
                                 "tags": data.tags.concat(d3.keys(data.components)).join("").toLowerCase() + member.toLowerCase() + content.name.toLowerCase()
                             }
-
                             samplesData.push(sample);
                             // I couldn't get the call back to work and that's why this is here!
                             // It needs to be changed later!
                             display(samplesData);
                         });
-
                     }
                 });
-            });
-            
+            });            
         });
-
-        // generate the page
-        //display(samplesData);
-
     }
 
     getSamples();
 
-
-    // this is a modified version of Mike Bostock's code
-    //display(null, samplesData);
-
-    /*
-    d3.select(window)
-        .on("scroll", maybeFetch)
-        .on("resize", maybeFetch);
-
-    function maybeFetch() {
-      if (!fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
-        ++page;
-        fetch();
-      }
-    }
-
-    function fetch() {
-      fetching = true;
-      d3.json("/" + encodeURIComponent("mbostock") + "/" + page + ".json" + (id ? "?" + id : ""), display);
-    }
-    */
-
-    function display(gists) {
+    function display(examples) {
       fetching = false;
 
-      if (!gists.length) {
+      if (!examples.length) {
         page = NaN;
         d3.select(".loading").remove();
         return;
       }
 
-      gists.forEach(function(d) {
+      examples.forEach(function(d) {
         d.created_at = parseDate(d.created_at);
         d.updated_at = parseDate(d.created_at);
       });
 
-      var gistEnter = d3.select(".gists").selectAll(".gist")
-          .data(gists)
+      var exampleEnter = d3.select(".examples").selectAll(".example")
+          .data(examples)
         .enter().insert("a", "br")
-          .attr("class", "gist")
+          .attr("class", "example")
           .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&description=" + d.id; })
           .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
 
-      gistEnter.append("span")
+      exampleEnter.append("span")
           .attr("class", "description")
           .text(function(d) { return d.id.replace(/_/g, " "); });
 
-      gistEnter.append("span")
+      exampleEnter.append("span")
           .attr("class", "date")
           .text(function(d) { return formatDate(d.created_at); });
 
-        // sorting creates issues with data matching! I removed it for now.
-        ///d3.select(".gists").selectAll(".gist")
-        ///    .sort(function(a, b) { return b.created_at - a.created_at; });
-        //id = gists[gists.length - 1].id;
-        
-        //setTimeout(maybeFetch, 50);
       d3.select(".loading").remove();
     }
 
-</script>
-
-<script type="text/javascript">
-    
+	// script to filter examples
     d3.select("#filterButton")
         .on("click", function(){
             // visibility: hidden; position: fixed
             var keywords = d3.select("#filtering").node().value.split(",");
-            var gistdivs = d3.selectAll(".gist");
+            var exampledivs = d3.selectAll(".example");
             
             // turn everything on
-            gistdivs.style("visibility", "visible")
-                  .style("position", "");
+            exampledivs.style("visibility","visible")
+                .style("position","");
 
             if (keywords.length==1 & keywords[0]=="") return; // no keyword!
 
             // map the values
             var isIncluded = {};
 
-            gistdivs.data().map(function(d){
-                    for (var i=0; i<keywords.length; i++){
-                        if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
-                        return;
-                    }
-                    isIncluded[d.id] = false;
-                 });
+            exampledivs.data().map(function(d){
+				for (var i=0; i<keywords.length; i++){
+					if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
+					return;
+				}
+				isIncluded[d.id] = false;
+            });
             
-           gistdivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
+           exampledivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
                 .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
-
         });
-
 </script>
-
-
-
 </body>
