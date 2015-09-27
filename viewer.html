@@ -25,10 +25,13 @@
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
 </div>
+<br></br>
 <div id="imageContainer"></div>
+<br></br>
 <form id="example-download">
 	<button type="submit">Download</button>
 </form>
+<div class="example-tags"></div>
 <div class="example-readme"></div>
 
 <script data-cfasync="false" type="text/javascript">
@@ -86,16 +89,20 @@ function generateContent(){
 	d3.select("title").text(example.description);
 	
 	// script for header
-	var header = d3.select(".header").append("p")
-		.text(example.owner +"'s example ");
+	var header = d3.select(".header").append("span")
+	  .text(example.owner +"'s example ");
 	header.append("a")
-		.attr("class","example")
-		.attr("title","View example on Github")
-		.attr("href", example.fork_path)
-		.text(example.description + " ");
+	  .attr("class","example")
+	  .attr("title","View example on Github")
+	  .attr("href", example.fork_path)
+	  .text(example.description + " ");
 	header.append("span")
-	    .attr("class","date")
-		.text("created: " + example.created_at);
+	  .attr("class","date")
+	  .text("created: " + example.created_at);
+	header.append("a")
+	  .attr("href","https://hydrashare.github.io/hydra/index.html")
+	  .style("float","right")
+	  .text("Return to Hydra Main Page")
 
 	// script for description
 	d3.select(".example-description").text(example.description);
@@ -176,10 +183,13 @@ function generateContent(){
 	function zoom() {
 	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 	};
+	
+	// script for tags
+	
 
 	// script for readme
 	var readme = d3.selectAll(".example-readme")
-	      d3.text(example.readme_path, function(error, content) {
+	    d3.text(example.readme_path, function(error, content) {
 	        readme.html(new Showdown.converter().makeHtml(content));
 	        readme.selectAll("code").each(function() { hljs.highlightBlock(this); });
 	    });

@@ -32,18 +32,24 @@ h2 a {
   width: 740px;
 }
 
+.main-link {
+  text-align: right;
+  width: 100%;
+}
+
 .header{
   color: #555;
 }
 		
 image {
-	cursor: move;
-	border: 1px solid #DEDEDE;
+  cursor: move;
 }
 
 .overlay {
-  fill: none;
-  pointer-events: all;
+  cursor: move;
+  fill: #DEDEDE;
+  pointer-events: all;  
+  border: 2px solid #DEDEDE;
 }
 
 .date {
