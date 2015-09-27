@@ -1,88 +1,38 @@
 <!DOCTYPE html>
 <html>
-<header>
+<head>
 	<meta charset="utf-8">
 	<title>Hydra Viewer</title>
-    <script src="./lib/d3.min.js" charset="utf-8"></script>
-	<script src="./lib/highlight.min.js" charset="utf-8"></script>
-
-	<style type="text/css">
-		@import url("/lib/style.css");
-
-
-		header{
-		  color: #555;
-		}
-
-		.sharing {
-			width:100%;
-			height:.2em;
-			font: normal 11px Arial;
-		}
-
-		a.gist {
-		  color: #000;
-		}
-
-		.overlay {
-		  fill: none;
-		  pointer-events: all;
-		}
-		.gist-download-count,.gist-rating{
-			font-size:18px;
-			text-align:center;
-			padding-top:10px;
-			width:58px;
-			height:29px;
-			font-family:Verdana,Helvetica,sans-serif;
-			color:black;
-			position:relative;
-			z-index:-1;
-			border:1px solid #ccc;
-			-moz-border-radius:4px;
-			-webkit-border-radius:4px;
-			border-radius:4px;
-			background:#d5d5d5;
-			background:-moz-linear-gradient(top,#d5d5d5 0,#efefef 48%,#fff 94%);
-			background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#d5d5d5),color-stop(48%,#efefef),color-stop(94%,#fff));
-			filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d5d5d5',endColorstr='#ffffff',GradientType=0)}
-	</style>
-
+	<link rel="icon" type="image/x-icon" href="/lib/favicon.ico">
+	<link rel="stylesheet" type="text/css" href="/lib/style.css">
+    <script src="./lib/d3.min.js"></script>
+	<script src="./lib/highlight.min.js"></script>
+	<script src="/lib/jquery-1.11.3.min.js"></script>
 	<!-- libraries for share this -->
 	<script type="text/javascript">var switchTo5x=true;</script>
 	<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
 	<script type="text/javascript">stLight.options({publisher: "8146e8ed-b6ac-46c1-a80d-3d5c4ba828e3", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script>
-
-</header>
+</head>
 
 <body>
+<div class="header"></div>
 <div>
-	<h1 class="gist-description"></h1>
+	<h1 class="example-description"></h1>
 	<span class='st_sharethis_hcount' displayText='ShareThis'></span>
 	<span class='st_email_hcount' displayText='Email'></span>
 	<span class='st_facebook_hcount' displayText='Facebook'></span>
 	<span class='st_twitter_hcount' displayText='Tweet'></span>
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
-	
 </div>
 <div id="imageContainer"></div>
-<div>
-	<a class="gist-download"></a>
-	<span>
-		Downloads:
-		<span class="gist-download-count"></span>
-	</span>
-	<span>
-		Avg. Rating:
-		<span class="gist-rating"></span>	
-	</span>
-	<div class="gist-readme"></div>
-</div>
+<form id="example-download">
+	<button type="submit">Download</button>
+</form>
+<div class="example-readme"></div>
 
-<script>
-
-var gist;
+<script data-cfasync="false" type="text/javascript">
+var example;
 
 function parseUri(){
 	
@@ -109,78 +59,94 @@ function parseUri(){
 
 	// read the json file
 	var githubBase = "https://raw.githubusercontent.com/" + owner + "/hydra/master/" + description;
-
 	var jsonFile = githubBase + "/input.json";
                     
     d3.json(jsonFile, function(error, data){
     	// use the id to get the following github information
-		gist = {
+		example = {
 			"owner": owner,
 			"description": description,
+			"fork_path": "github.com/" + owner + "/hydra/tree/master/" + description,
 			"image_path": githubBase + "/" + data.ghimg,
 			"download_path": githubBase + "/" + data.file,
 			"readme_path": githubBase + "/README.md",
-			"num_downloads":0,
-			"avg_rating":0,
 			"components": data.components,
 			"tags": data.tags,
 			"versions": data.versions,
-			"history":[{"version":"b35094578c02f7bd174c7d3c58850b25d647a543"}],
 			"created_at":data.date
 		};
-
-		generateGraph(gist);
+		generateContent(example);
     });
-}
+};
+parseUri();
 
+function generateContent(){
 
-	parseUri();
-
-function generateGraph(){
-
+	// script for title
+	d3.select("title").text(example.description);
+	
 	// script for header
-	var header = d3.select("header").append("p")
-		.text(gist.owner +"'s gist ");
+	var header = d3.select(".header").append("p")
+		.text(example.owner +"'s example ");
 	header.append("a")
-		.attr("class","gist")
-		.attr("title","View gist on Github")
-		.attr("href", gist.fork_path)
-		.text(gist.description + " ");
+		.attr("class","example")
+		.attr("title","View example on Github")
+		.attr("href", example.fork_path)
+		.text(example.description + " ");
 	header.append("span")
 	    .attr("class","date")
-		.text("created: " + gist.created_at);
+		.text("created: " + example.created_at);
 
 	// script for description
-	d3.select(".gist-description").text(gist.description);
+	d3.select(".example-description").text(example.description);
 
 	// script for tracking downloads
-	d3.select(".gist-download")
-		.attr("href",gist.download_path)
-		.attr("download","example.ghx")
-	  .append("button")
-		.text("Download")
-		.on("click",incrementDownload);
-
-	function updateDownloadCount(){
-		d3.select(".gist-download-count")
-		.text(gist.num_downloads);
-	};
-	updateDownloadCount();
-	function incrementDownload() {
-	  gist.num_downloads++;
-	  updateDownloadCount();
-	  //call to google doc to log # of downloads
-	};
-
-	// script for tracking ratings
-	function updateRating(){
-		d3.select(".gist-rating")
-		.text(gist.avg_rating);
-	};
-	updateRating();
-	function addRating() {
-	  //call to google doc to log rating
-	};
+	jQuery(document).ready(function( $ ) {
+		var request;
+		// bind the download submit event to the form
+		$("#example-download").submit(function(event){
+			//download the zip file from github
+			window.location = example.download_path;
+			
+			// abort any pending request
+			if (request) {  
+				request.abort();
+			}
+			
+			// setup some local variables
+			var $form = $(this);  		
+			var $inputs = $form.find("button");
+			$inputs.prop("disabled", true);
+			$('#downloadCount').text('#');		
+			data={"owner":example.owner,"description":example.description,"request_type":"increment"};
+			
+			// fire off the request to /form.php
+			request = $.ajax({
+				url: "https://script.google.com/macros/s/AKfycbxiRnl-119Qy-Ygchrjp5OiMelYUJCZ-ZHjpwKTm6dtaYCOZ9IZ/exec",
+				type: "post",
+				data: data
+			});
+			
+			// callback handler that will be called on success
+			request.done(function (response, textStatus, jqXHR){
+				// log a message to the console
+				$('#downloadCount').text(response.downloads);
+				console.log(response);
+			});
+			// callback handler that will be called on failure
+			request.fail(function (jqXHR, textStatus, errorThrown){
+				// log the error to the console
+				console.error("The following error occured: " + textStatus, errorThrown);
+			});
+			// callback handler that will be called regardless if the request failed or succeeded
+			request.always(function () {
+				// reenable the inputs
+				$inputs.prop("disabled", false);
+			});
+			// prevent default posting of form
+			event.preventDefault();
+		});
+	});
 
 	// script for zooming and panning .png images
 	var imgWidth = 960,imgHeight = 480,		// Image dimensions (don't change these)
@@ -204,22 +170,19 @@ function generateGraph(){
 	svg.append("image")
 	    .attr("width",  imgWidth + "px")
 	    .attr("height", imgHeight + "px")
-	    .attr("xlink:href", gist.image_path);
+	    .attr("xlink:href", example.image_path);
 
 	function zoom() {
 	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-	  //svg.log("translate: " + d3.event.translate + ", scale: " + d3.event.scale);
 	};
 
 	// script for readme
-	var readme = d3.selectAll(".gist-readme")
-	      d3.text(gist.readme_path, function(error, content) {
+	var readme = d3.selectAll(".example-readme")
+	      d3.text(example.readme_path, function(error, content) {
 	        readme.html(new Showdown.converter().makeHtml(content));
 	        readme.selectAll("code").each(function() { hljs.highlightBlock(this); });
 	    });
-
 }
-
 </script>
 
 </html>

@@ -4,10 +4,10 @@ html {
 
 body {
   font-family: "Helvetica Neue", Helvetica, sans-serif;
-  /*margin: 1em auto 4em auto;
+  margin: 1em auto 4em auto;
   position: relative;
   tab-size: 2;
-  width: 960px; */
+  width: 960px;
 }
 
 h1 {
@@ -30,6 +30,14 @@ h2 a {
   left: -20px;
   position: absolute;
   width: 740px;
+}
+
+.header{
+  color: #555;
+}
+		
+image {
+	cursor: move;
 }
 
 .date {
