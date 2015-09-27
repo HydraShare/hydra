@@ -27,7 +27,7 @@
 <body>
 <div class="header"></div>
 <div>
-	<h1 class="example-description"></h1>
+	<h2 class="example-description"></h2>
 	<span class='st_sharethis_hcount' displayText='ShareThis'></span>
 	<span class='st_email_hcount' displayText='Email'></span>
 	<span class='st_facebook_hcount' displayText='Facebook'></span>
@@ -122,7 +122,7 @@ function generateContent(){
 	  .text("Return to Hydra Main Page")
 
 	// script for description
-	d3.select(".example-description").text(example.description);
+	d3.select(".example-description").text(example.description.replace("_", " "));
 
 	// script for tracking downloads
 	jQuery(document).ready(function( $ ) {
