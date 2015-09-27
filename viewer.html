@@ -35,8 +35,10 @@
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
 	<select id="versions" style = "float:right"> </select>
+	<button id="zoomtoextents" style="float:right" type="button">ZoomX</button>
 </div>
-<br></br>
+<hr>
+
 <div id="imageContainer"></div>
 <br>
 <form id="example-download">
@@ -248,9 +250,18 @@ function generateContent(){
 	    .attr("xlink:href", example.image_path);
 
 	function zoom() {
-	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	  zm = svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 	};
 	
+	d3.select("#zoomtoextents").on("click", function(){
+	  
+	  svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
+	    .call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom));
+
+
+		});
+
+
 	// script for tags
 	d3.select(".example-tags").text("Tags: " + example.tags.join("; "));
 
