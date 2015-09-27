@@ -130,30 +130,40 @@
 
 	// script to filter examples
     d3.select("#filterButton")
-        .on("click", function(){
-            // visibility: hidden; position: fixed
-            var keywords = d3.select("#filtering").node().value.split(",");
-            var exampledivs = d3.selectAll(".example");
-            
-            // turn everything on
-            exampledivs.style("visibility","visible")
-                .style("position","");
+        .on("click", filter);
 
-            if (keywords.length==1 & keywords[0]=="") return; // no keyword!
 
-            // map the values
-            var isIncluded = {};
+    d3.select('#filtering').on("keypress", function(e){
+        if (!e) e = window.event;
+        if (e.keyCode == '13') filter();
+      });
 
-            exampledivs.data().map(function(d){
-				for (var i=0; i<keywords.length; i++){
-					if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
-					return;
-				}
-				isIncluded[d.id] = false;
-            });
-            
-           exampledivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
-                .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
+
+    function filter(){
+        // visibility: hidden; position: fixed
+        var keywords = d3.select("#filtering").node().value.split(",");
+        var exampledivs = d3.selectAll(".example");
+        
+        // turn everything on
+        exampledivs.style("visibility","visible")
+            .style("position","");
+
+        if (keywords.length==1 & keywords[0]=="") return; // no keyword!
+
+        // map the values
+        var isIncluded = {};
+
+        exampledivs.data().map(function(d){
+            for (var i=0; i<keywords.length; i++){
+                if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
+                return;
+            }
+            isIncluded[d.id] = false;
         });
+        
+       exampledivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
+            .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
+    }
+
 </script>
 </body>
