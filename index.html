@@ -240,7 +240,7 @@
 
       gistEnter.append("span")
           .attr("class", "description")
-          .text(function(d) { return d.description || d.id; });
+          .text(function(d) { return d.id.replace(/_/g, " "); });
 
       gistEnter.append("span")
           .attr("class", "date")
