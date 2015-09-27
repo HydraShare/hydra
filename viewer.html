@@ -56,7 +56,8 @@
 <div class="example-components" style="width:960px"></div>
 
 <script data-cfasync="false" type="text/javascript">
-var example;
+var example,
+	searchwkeywordbasepath = "https://hydrashare.github.io/hydra/index.html?keywords=";
 
 function parseUri(){
 	
@@ -113,7 +114,13 @@ function generateContent(){
 	
 	// script for header
 	var header = d3.select(".header").append("span")
-	  .text(example.owner +"'s example ");
+		
+	header.append("a")
+		.attr("href", searchwkeywordbasepath + example.owner)
+	  	.text(example.owner);
+	
+	header.append("span").text("'s example ");
+
 	header.append("a")
 	  .attr("title","View example on Github")
 	  .attr("href", example.fork_path)
@@ -260,7 +267,7 @@ function generateContent(){
 
 	// script for tags
 	d3.select(".example-tags").text("Tags: " + example.tags.join("; "));
-
+	
 	// script for readme
 	var readme = d3.select(".example-readme");
     d3.text(example.readme_path, function(error, content) {
