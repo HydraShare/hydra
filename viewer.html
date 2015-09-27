@@ -25,13 +25,16 @@
 	<span class='st_twitter_hcount' displayText='Tweet'></span>
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
+	<select id="versions" style = "float:right"> </select>
 </div>
 <br></br>
 <div id="imageContainer"></div>
 <br></br>
-<form id="example-download">
-	<button type="submit">Download</button>
-</form>
+<div>
+	<form id="example-download">
+		<button type="submit">Download</button>
+	</form>
+</div>
 <div class="example-tags"></div>
 <div class="example-readme"></div>
 
@@ -156,6 +159,26 @@ function generateContent(){
 			event.preventDefault();
 		});
 	});
+
+
+	// add versions
+
+	// add options based on input and outputs
+    d3.select("select")
+    	.text("version: ")
+    	.selectAll("option")
+      	.data(example.versions)
+      	.enter()
+        	.append("option")
+        	.attr("value", function (d) { return d; })
+        		.text(function (d) { return d; });
+    
+    // add change event to resort images
+    d3.select("select").on("change", function(d) {
+        version = d3.select(this).property("value");
+        console.log(version);
+        // image, description and change log needs to be updated
+    })
 
 	// script for zooming and panning .png images
 	var imgWidth = 960,imgHeight = 480,		// Image dimensions (don't change these)
