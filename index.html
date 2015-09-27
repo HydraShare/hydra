@@ -6,9 +6,9 @@
 
 <style>
 
-    @import url("/style.css?20120730");
+    @import url("lib/style1.css");
 
-    h1 {
+    h2 {
       color: #555;
     }
 
@@ -81,11 +81,10 @@
 
 <header>
     Inspired by <a href="/">bl.ocks.org</a>
-    
-    <form name="myform" onChange="filterData">
-        Filter <input type="text" id="filtering" placeholder="username, component name,&hellip;">
-    </form>
-
+    <div style="float:right">    
+        <input type="text" id="filtering" placeholder="username, component name,&hellip;">
+        <button id="filterButton" type="button">Filter!</button>
+    </div>
 </header>
 
 <head>
@@ -106,7 +105,7 @@
 </head>
 
 
-<h1 class="user-login" title="Click on images for more information"> Welcome to Hydra! Click on images for more information </h1>
+<h2 class="user-login" title="Click on images for more information"> Welcome to Hydra! Click on images for more information </h2>
 
 <div class="gists">
   <br clear="both">
@@ -169,14 +168,12 @@
                         
                         d3.json(jsonFile, function(error, data){
                             
-                            // parse date
-                            // date);
-                            
                             var sample = {
                                 "owner" : member,
                                 "id": content.name,
                                 "created_at": parseDate(data.date),
-                                "thumbnail": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" + data.thumbnail
+                                "thumbnail": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" + data.thumbnail,
+                                "tags": data.tags.concat(d3.keys(data.components)).join("").toLowerCase() + member.toLowerCase() + content.name.toLowerCase()
                             }
 
                             samplesData.push(sample);
@@ -235,7 +232,7 @@
       });
 
       var gistEnter = d3.select(".gists").selectAll(".gist")
-          .data(gists) //, function(d) { return d.id; })
+          .data(gists)
         .enter().insert("a", "br")
           .attr("class", "gist")
           .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&description=" + d.id; })
@@ -260,11 +257,46 @@
 </script>
 
 <script type="text/javascript">
-    function filterData(){
-        // visibility: hidden; position: fixed
-        var keywords = d3.select("#filtering").node().value.split(",");
-        console.log(keywords);
-    }
+    
+    d3.select("#filterButton")
+        .on("click", function(){
+            // visibility: hidden; position: fixed
+            var keywords = d3.select("#filtering").node().value.split(",");
+            
+            if (keywords.length==1 & keywords[0]==""){
+                
+                d3.selectAll(".gist")
+                    .style("visibility", "visible")
+                    .style("position", "");
+                return;
+            }
+
+            d3.selectAll(".gist")
+                .style("visibility", "visible") //set everything to visible first and then filter it
+                .style("position", "")
+                .style("visibility", function(d){
+                    for (var i=0; i<keywords.length; i++){
+                        console.log(keywords[i], d.tags);
+                        console.log(d.tags.includes(keywords[i].toLowerCase()));
+                        console.log("----------------");
+
+                        if (d.tags.includes(keywords[i].toLowerCase())) return "visible";
+                        }
+                    
+                    return "hidden";
+                    })
+                .style("position", function(d){
+                    
+                    for (var i=0; i<keywords.length; i++){
+
+                            if(d.tags.includes(keywords[i].toLowerCase())) return "";
+                        }
+
+                    return "fixed";
+                    });
+
+        });
+
 </script>
 
 
