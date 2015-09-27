@@ -210,7 +210,7 @@ function generateContent(){
     d3.select("select")
     	.text("version: ")
     	.selectAll("option")
-      	.data(example.versions)
+      	.data(example.versions.reverse())
       	.enter()
         	.append("option")
         	.attr("value", function (d) { return d; })
