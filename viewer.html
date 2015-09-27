@@ -41,6 +41,8 @@
 <br>
 <form id="example-download">
 	<button type="submit">Download</button>
+	<label><input type="radio" id="toggleView" name="viewMode" value="GH" checked> GH</label> <!-- show 2D image on load-->
+    <label><input type="radio" id="toggleView" name="viewMode" value="RH"> RH</label>
 	<div class="example-tags" style="float: right"></div>
 </form>
 <br>
@@ -88,6 +90,7 @@ function parseUri(){
 			"description": description,
 			"fork_path": "http://www.github.com/" + owner + "/hydra/tree/master/" + description,
 			"image_path": githubBase + "/" + data.ghimg,
+			"rhinoImage_path": githubBase + "/" + data.rhinoimg,
 			"download_path": githubBase + "/" + data.file,
 			"changelog": githubBase + "/changelog.md",
 			"readme_path": githubBase + "/README.md",
@@ -173,7 +176,34 @@ function generateContent(){
 		});
 	});
 
+	// change toggle view between Rhino and Grasshopper
+    d3.selectAll("input#toggleView")
+      .on("change", toggleView)
 
+    function toggleView() {
+
+        var selectedView = this.value;
+
+        if (selectedView=="RH"){
+        	// check for rhino image
+        	if (example.rhinoImage_path == ""){
+	        	// give an alret
+        		alret("There is no Rhino image available!");
+        		return;
+        	}
+        	
+        	// if available change it to Rhino
+        	svg.select("image")
+	    		.attr("xlink:href", example.rhinoImage_path);
+        } else{
+
+        	// change the view to Grasshopper
+        	svg.select("image")
+	    		.attr("xlink:href", example.image_path);
+
+        }
+    }
+            
 	// add versions
 
 	// add options based on input and outputs
