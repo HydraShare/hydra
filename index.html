@@ -80,7 +80,12 @@
 </style>
 
 <header>
-  Inspired by <a href="/">bl.ocks.org</a>
+    Inspired by <a href="/">bl.ocks.org</a>
+    
+    <form name="myform" onChange="filterData">
+        Filter <input type="text" id="filtering" placeholder="username, component name,&hellip;">
+    </form>
+
 </header>
 
 <head>
@@ -254,7 +259,13 @@
 
 </script>
 
-
+<script type="text/javascript">
+    function filterData(){
+        // visibility: hidden; position: fixed
+        var keywords = d3.select("#filtering").node().value.split(",");
+        console.log(keywords);
+    }
+</script>
 
 
 
