@@ -13,6 +13,15 @@
 	<script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
 	<script type="text/javascript" src="https://w.sharethis.com/button/buttons.js"></script>
 	<script type="text/javascript">stLight.options({publisher: "8146e8ed-b6ac-46c1-a80d-3d5c4ba828e3", doNotHash: false, doNotCopy: false, hashAddressBar: false});</script>
+
+	<style type="text/css">
+	
+	span.components {
+		border: 2px solid #7192D8;
+    	border-radius: 10px;
+    }
+    
+    </style>
 </head>
 
 <body>
@@ -29,14 +38,18 @@
 </div>
 <br></br>
 <div id="imageContainer"></div>
-<br></br>
-<div>
-	<form id="example-download">
-		<button type="submit">Download</button>
-	</form>
-</div>
-<div class="example-tags"></div>
+<br>
+<form id="example-download">
+	<button type="submit">Download</button>
+	<div class="example-tags" style="float: right"></div>
+</form>
+<br>
+<hr>
 <div class="example-readme"></div>
+<hr>
+<div class="example-changelog"></div>
+<hr>
+<div class="example-components" style="width:960px"></div>
 
 <script data-cfasync="false" type="text/javascript">
 var example;
@@ -76,6 +89,7 @@ function parseUri(){
 			"fork_path": "http://www.github.com/" + owner + "/hydra/tree/master/" + description,
 			"image_path": githubBase + "/" + data.ghimg,
 			"download_path": githubBase + "/" + data.file,
+			"changelog": githubBase + "/changelog.md",
 			"readme_path": githubBase + "/README.md",
 			"components": data.components,
 			"tags": data.tags,
@@ -208,14 +222,31 @@ function generateContent(){
 	};
 	
 	// script for tags
-	
+	d3.select(".example-tags").text("Tags: " + example.tags.join("; "));
 
 	// script for readme
-	var readme = d3.selectAll(".example-readme")
-	    d3.text(example.readme_path, function(error, content) {
-	        readme.html(new Showdown.converter().makeHtml(content));
-	        readme.selectAll("code").each(function() { hljs.highlightBlock(this); });
-	    });
+	var readme = d3.select(".example-readme");
+    d3.text(example.readme_path, function(error, content) {
+        readme.html(new Showdown.converter().makeHtml(content));
+        readme.selectAll("code").each(function() { hljs.highlightBlock(this); });
+    });
+
+    // add change log
+	var changelog = d3.select(".example-changelog");
+	
+	d3.text(example.changelog, function(error, content) {
+        	changelog.html(new Showdown.converter().makeHtml(content));
+        	changelog.selectAll("code").each(function() { hljs.highlightBlock(this); });
+    });
+
+    // add list of components
+    d3.select(".example-components")
+    	.selectAll("span")
+    	.data(d3.keys(example.components))
+    	.enter()
+    		.append("span")
+    		.attr("class", "components")
+    		.text(function(d){return " " + example.components[d] + "X" + d +"; "})
 }
 </script>
 
