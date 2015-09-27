@@ -1,29 +1,87 @@
 <!--
 //The MIT License (MIT)
-//
-//Copyright (c) 2015 Mostapha Sadeghipour Roudsari @mostaphaRoudsari
-//
-//Permission is hereby granted, free of charge, to any person obtaining a copy
-//of this software and associated documentation files (the "Software"), to deal
-//in the Software without restriction, including without limitation the rights
-//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//copies of the Software, and to permit persons to whom the Software is
-//furnished to do so, subject to the following conditions:
-//
-//The above copyright notice and this permission notice shall be included in
-//all copies or substantial portions of the Software.
-//
-//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//THE SOFTWARE.
 -->
-
 <!DOCTYPE html>
 <html lang="en">
+
+<style>
+
+    @import url("/style.css?20120730");
+
+    h1 {
+      color: #555;
+    }
+
+    a.user-login {
+      color: #000;
+    }
+
+    a.gist {
+      background-position: 50% 0%;
+      border: solid 1px #eee;
+      border-bottom: solid 1px #ccc;
+      box-sizing: border-box;
+      -o-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      display: inline-block;
+      float: left;
+      height: 82px;
+      line-height: normal;
+      margin: 0 10px 10px 0;
+      position: relative;
+      text-shadow: 1px 1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, -1px -1px 0 #fff;
+      transition: ease 750ms background-position;
+      -webkit-transition: ease 750ms background-position;
+      -moz-transition: ease 750ms background-position;
+      -ms-transition: ease 750ms background-position;
+      -o-transition: ease 750ms background-position;
+      width: 232px;
+    }
+
+    a.gist:nth-child(4n) {
+      margin-right: 0;
+    }
+
+    a.gist:hover,
+    a.gist:focus {
+      background-color: #eee;
+      background-position: 50% 100%;
+      text-decoration: none;
+    }
+
+    a.gist .description,
+    a.gist .date {
+      position: absolute;
+      padding: 10px;
+      z-index: 2;
+    }
+
+    a.gist .description {
+      top: 0;
+      color: #000;
+    }
+
+    a.gist .date {
+      display: none;
+    }
+
+    a.gist:hover .description {
+      text-decoration: underline;
+    }
+
+    .date {
+      color: #636363;
+      display: block;
+      font-size: smaller;
+    }
+
+</style>
+
+<header>
+  Inspired by <a href="/">bl.ocks.org</a>
+</header>
 
 <head>
 
@@ -43,79 +101,152 @@
 </head>
 
 <body>
+
 <script type="text/javascript">
+    // read all the available example files
+    var members = {};
+    var samplesData = [];
 
-var members = {};
-var samplesData = [];
+    function getSamples(){
 
-function getMembers(){
+        // here is a json object of all Hydra forks
+        var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
 
-    // here is a json object of all Hydra forks
-    var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
-
-    d3.json(forks, function(error, data){
-        // find all the forks and member names
-        data.forEach(function(d){
-                    // add each member with url to their fork        
-                    members[d.owner.login]= d.owner.html_url;
-            });
-        
-        // get content    
-        getContents();
-    
-    });
-}
-
-
-function getContents(){
-    
-    var basepath;
-    
-    d3.keys(members).forEach(function(member){
-
-        basepath = "https://api.github.com/repos/" + member + "/Hydra/contents";
-
-        // get contents and collect trees and json objects inside folders
-        // also add owner as the level 
-        d3.json(basepath, function(error, contents){
+        d3.json(forks, function(error, data){
             // find all the forks and member names
-            contents.forEach(function(content){
-                // add each member with url to their fork        
-                if(content.type=="dir"){
-                    
-                    // parse folder contents
-                    // create the path to json file
-                    var jsonFile = "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/input.json";
-                    
-                    d3.json(jsonFile, function(error, data){
+            data.forEach(function(d){
+                        // add each member with url to their fork        
+                        members[d.owner.login]= d.owner.html_url;
+                });
+            
+            // get content    
+            getContents();
+        
+        });
+    }
+
+
+    function getContents(){
+        
+        var basepath;
+        
+        d3.keys(members).forEach(function(member){
+
+            basepath = "https://api.github.com/repos/" + member + "/Hydra/contents";
+
+            // get contents and collect trees and json objects inside folders
+            // also add owner as the level 
+            d3.json(basepath, function(error, contents){
+                // find all the forks and member names
+                contents.forEach(function(content){
+                    // add each member with url to their fork        
+                    if(content.type=="dir"){
                         
-                        // parse date
-                        // parseDate(date);
+                        // parse folder contents
+                        // create the path to json file
+                        var jsonFile = "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/input.json";
                         
-                        var sample = {
-                            "owner" : member,
-                            "id": content.name,
-                            "created_at": data.date,
-                            "png": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" +content.name + ".png"
-                        }
+                        d3.json(jsonFile, function(error, data){
+                            
+                            // parse date
+                            // parseDate(date);
+                            
+                            var sample = {
+                                "owner" : member,
+                                "id": content.name,
+                                "created_at": data.date,
+                                "png": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" + d.ghimage
+                            }
 
 
-                        samplesData.push(sample);
-                    })
+                            samplesData.push(sample);
 
-                }
+                        })
+
+                    }
+                });
             });
-        })
 
-    });
+        });
 
-}
+        // generate the page
+        genratePage();
 
+    }
 
+    getSamples();
 
-getMembers();
+    // file:///C:/Users/Administrator/Documents/GitHub/hydra/viewer.html?owner=chriswmackey&description=Energy_Balance
+    var formatDate = d3.time.format("%B %-d, %Y"),
+        parseDate = d3.time.format.iso.parse,
+        page = 0,
+        fetching,
+        id;
 
-// file:///C:/Users/Administrator/Documents/GitHub/hydra/viewer.html?owner=chriswmackey&description=Energy_Balance
+    function genratePage(){
+
+        // this is a modified version of Mike Bostock's code
+        display(null, samplesData);
+
+        /*
+        d3.select(window)
+            .on("scroll", maybeFetch)
+            .on("resize", maybeFetch);
+
+        function maybeFetch() {
+          if (!fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
+            ++page;
+            fetch();
+          }
+        }
+
+        function fetch() {
+          fetching = true;
+          d3.json("/" + encodeURIComponent("mbostock") + "/" + page + ".json" + (id ? "?" + id : ""), display);
+        }
+        */
+
+        function display(error, gists) {
+          fetching = false;
+
+          if (!gists.length) {
+            page = NaN;
+            d3.select(".loading").remove();
+            return;
+          }
+
+          gists.forEach(function(d) {
+            d.created_at = parseDate(d.created_at);
+            d.updated_at = parseDate(d.created_at);
+          });
+
+          var gistEnter = d3.select(".gists").selectAll(".gist")
+              .data(gists, function(d) { return d.id; })
+            .enter().insert("a", "br")
+              .attr("class", "gist")
+              .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&description=" + d.id; })
+              .style("background-image", function(d) { return d.ghimage;});
+
+          gistEnter.append("span")
+              .attr("class", "description")
+              .text(function(d) { return d.description || d.id; });
+
+          gistEnter.append("span")
+              .attr("class", "date")
+              .text(function(d) { return formatDate(d.created_at); });
+
+          d3.select(".gists").selectAll(".gist")
+              .sort(function(a, b) { return b.created_at - a.created_at; });
+
+          id = gists[gists.length - 1].id;
+          setTimeout(maybeFetch, 50);
+        }
+    }
 
 </script>
+
+
+
+
+
 </body>
