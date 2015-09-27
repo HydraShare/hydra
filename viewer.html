@@ -35,7 +35,7 @@
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
 	<select id="versions" style = "float:right"> </select>
-	<button id="zoomtoextents" style="float:right" type="button">ZoomX</button>
+	<button id="zoomtoextents" style="float:right" type="button">ZoomToExtent</button>
 </div>
 <hr>
 
@@ -228,7 +228,8 @@ function generateContent(){
 	// script for zooming and panning .png images
 	var imgWidth = 960,imgHeight = 480,		// Image dimensions (don't change these)
 	    width =  960, height = 480,         // Dimensions of cropped region
-	    translate0 = [0, 0], scale0 = 1;    // Initial offset & scale
+	    translate0 = [0, 0], currentOffset = translate0,  // Initial offset 
+		scale0 = 1, currentZoom = scale0;   // Initial scale
 
 	svg = d3.select("#imageContainer").append("svg")
 	    .attr("width",  width + "px")
@@ -238,29 +239,24 @@ function generateContent(){
 	    .attr("class", "overlay")
 	    .attr("width", width + "px")
 	    .attr("height", height + "px");
-
-	svg = svg.append("g")
-	    .attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
-	    .call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom))
+	
+	var zoom = d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom);
+	svg = svg.call(zoom)
 	  .append("g");
 
 	svg.append("image")
 	    .attr("width",  imgWidth + "px")
 	    .attr("height", imgHeight + "px")
 	    .attr("xlink:href", example.image_path);
-
+	
 	function zoom() {
-	  zm = svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 	};
 	
 	d3.select("#zoomtoextents").on("click", function(){
-	  
-	  svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
-	    .call(d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom));
-
-
-		});
-
+		svg.call(zoom.scale(1).translate([0,0]));
+		svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
+	});
 
 	// script for tags
 	d3.select(".example-tags").text("Tags: " + example.tags.join("; "));
