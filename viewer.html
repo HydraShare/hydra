@@ -96,7 +96,6 @@ function generateContent(){
 	var header = d3.select(".header").append("span")
 	  .text(example.owner +"'s example ");
 	header.append("a")
-	  .attr("class","example")
 	  .attr("title","View example on Github")
 	  .attr("href", example.fork_path)
 	  .text(example.description + " ");
