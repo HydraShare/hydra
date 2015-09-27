@@ -38,6 +38,12 @@ h2 a {
 		
 image {
 	cursor: move;
+	border: 1px solid #DEDEDE;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
 }
 
 .date {
@@ -122,10 +128,4 @@ aside,
 .javascript .class,
 .javascript .special {
   color: #e6550d;
-}
-
-iframe {
-  width: 960px;
-  height: 500px;
-  border: 1px solid #DEDEDE;
 }
