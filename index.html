@@ -246,11 +246,12 @@
           .attr("class", "date")
           .text(function(d) { return formatDate(d.created_at); });
 
-      d3.select(".gists").selectAll(".gist")
-          .sort(function(a, b) { return b.created_at - a.created_at; });
-
-      //id = gists[gists.length - 1].id;
-      //setTimeout(maybeFetch, 50);
+        // sorting creates issues with data matching! I removed it for now.
+        ///d3.select(".gists").selectAll(".gist")
+        ///    .sort(function(a, b) { return b.created_at - a.created_at; });
+        //id = gists[gists.length - 1].id;
+        
+        //setTimeout(maybeFetch, 50);
       d3.select(".loading").remove();
     }
 
@@ -262,38 +263,27 @@
         .on("click", function(){
             // visibility: hidden; position: fixed
             var keywords = d3.select("#filtering").node().value.split(",");
+            var gistdivs = d3.selectAll(".gist");
             
-            if (keywords.length==1 & keywords[0]==""){
-                
-                d3.selectAll(".gist")
-                    .style("visibility", "visible")
-                    .style("position", "");
-                return;
-            }
+            // turn everything on
+            gistdivs.style("visibility", "visible")
+                  .style("position", "");
 
-            d3.selectAll(".gist")
-                .style("visibility", "visible") //set everything to visible first and then filter it
-                .style("position", "")
-                .style("visibility", function(d){
+            if (keywords.length==1 & keywords[0]=="") return; // no keyword!
+
+            // map the values
+            var isIncluded = {};
+
+            gistdivs.data().map(function(d){
                     for (var i=0; i<keywords.length; i++){
-                        console.log(keywords[i], d.tags);
-                        console.log(d.tags.includes(keywords[i].toLowerCase()));
-                        console.log("----------------");
-
-                        if (d.tags.includes(keywords[i].toLowerCase())) return "visible";
-                        }
-                    
-                    return "hidden";
-                    })
-                .style("position", function(d){
-                    
-                    for (var i=0; i<keywords.length; i++){
-
-                            if(d.tags.includes(keywords[i].toLowerCase())) return "";
-                        }
-
-                    return "fixed";
-                    });
+                        if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
+                        return;
+                    }
+                    isIncluded[d.id] = false;
+                 });
+            
+           gistdivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
+                .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
 
         });
 
