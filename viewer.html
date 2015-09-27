@@ -125,7 +125,7 @@ function generateContent(){
 	  .text("Return to Hydra Main Page")
 
 	// script for description
-	d3.select(".example-description").text(example.description.replace("_", " "));
+	d3.select(".example-description").text(example.description.replace(/_/g, " "));
 
 	// script for tracking downloads
 	jQuery(document).ready(function( $ ) {
