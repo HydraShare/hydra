@@ -225,7 +225,7 @@
             .enter().insert("a", "br")
               .attr("class", "gist")
               .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&description=" + d.id; })
-              .style("background-image", function(d) { return d.ghimage;});
+              .style("background-image", function(d) { return d.ghimg;});
 
           gistEnter.append("span")
               .attr("class", "description")
