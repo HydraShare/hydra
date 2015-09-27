@@ -266,7 +266,12 @@ function generateContent(){
 	});
 
 	// script for tags
-	d3.select(".example-tags").text("Tags: " + example.tags.join("; "));
+	d3.select(".example-tags").selectAll("a")
+		.data(example.tags)
+		.enter()
+			.append("a")
+			.attr("href", function(d){ return searchwkeywordbasepath + d})
+	  		.text(function(d){ return "#" + d + " "});
 	
 	// script for readme
 	var readme = d3.select(".example-readme");
