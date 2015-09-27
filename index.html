@@ -1,0 +1,121 @@
+<!--
+//The MIT License (MIT)
+//
+//Copyright (c) 2015 Mostapha Sadeghipour Roudsari @mostaphaRoudsari
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="mostapha roudsari" content="">
+
+    <title>Hydra - Sharing platform for Grasshopper and Dynamo users</title>
+    
+    <link rel="shortcut icon" href="">
+    <link rel="icon" type="image/png" href="">
+
+    <script src="./lib/d3.min.js" charset="utf-8"></script>
+
+</head>
+
+<body>
+<script type="text/javascript">
+
+var members = {};
+var samplesData = [];
+
+function getMembers(){
+
+    // here is a json object of all Hydra forks
+    var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
+
+    d3.json(forks, function(error, data){
+        // find all the forks and member names
+        data.forEach(function(d){
+                    // add each member with url to their fork        
+                    members[d.owner.login]= d.owner.html_url;
+            });
+        
+        // get content    
+        getContents();
+    
+    });
+}
+
+
+function getContents(){
+    
+    var basepath;
+    
+    d3.keys(members).forEach(function(member){
+
+        basepath = "https://api.github.com/repos/" + member + "/Hydra/contents";
+
+        // get contents and collect trees and json objects inside folders
+        // also add owner as the level 
+        d3.json(basepath, function(error, contents){
+            // find all the forks and member names
+            contents.forEach(function(content){
+                // add each member with url to their fork        
+                if(content.type=="dir"){
+                    
+                    // parse folder contents
+                    // create the path to json file
+                    var jsonFile = "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/input.json";
+                    
+                    d3.json(jsonFile, function(error, data){
+                        
+                        // parse date
+                        // parseDate(date);
+                        
+                        var sample = {
+                            "owner" : member,
+                            "id": content.name,
+                            "created_at": data.date,
+                            "png": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" +content.name + ".png"
+                        }
+
+
+                        samplesData.push(sample);
+                    })
+
+                }
+            });
+        })
+
+    });
+
+}
+
+
+
+getMembers();
+
+// file:///C:/Users/Administrator/Documents/GitHub/hydra/viewer.html?owner=chriswmackey&description=Energy_Balance
+
+</script>
+</body>

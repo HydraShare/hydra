@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Hydra</title>
+<link rel="icon" href="/favicon.png">
+<style>
+
+@import url("/style.css?20120730");
+
+h1 {
+  color: #555;
+}
+
+a.user-login {
+  color: #000;
+}
+
+a.gist {
+  background-position: 50% 0%;
+  border: solid 1px #eee;
+  border-bottom: solid 1px #ccc;
+  box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  display: inline-block;
+  float: left;
+  height: 82px;
+  line-height: normal;
+  margin: 0 10px 10px 0;
+  position: relative;
+  text-shadow: 1px 1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, -1px -1px 0 #fff;
+  transition: ease 750ms background-position;
+  -webkit-transition: ease 750ms background-position;
+  -moz-transition: ease 750ms background-position;
+  -ms-transition: ease 750ms background-position;
+  -o-transition: ease 750ms background-position;
+  width: 232px;
+}
+
+a.gist:nth-child(4n) {
+  margin-right: 0;
+}
+
+a.gist:hover,
+a.gist:focus {
+  background-color: #eee;
+  background-position: 50% 100%;
+  text-decoration: none;
+}
+
+a.gist .description,
+a.gist .date {
+  position: absolute;
+  padding: 10px;
+  z-index: 2;
+}
+
+a.gist .description {
+  top: 0;
+  color: #000;
+}
+
+a.gist .date {
+  display: none;
+}
+
+a.gist:hover .description {
+  text-decoration: underline;
+}
+
+.date {
+  color: #636363;
+  display: block;
+  font-size: smaller;
+}
+
+</style>
+
+<header>
+  about <a href="/">bl.ocks.org</a>
+</header>
+
+<h1><a class="user-login" title="View mbostock on GitHub" href="https://github.com/mbostock">mbostock</a>’s blocks</h1>
+
+<div class="gists">
+  <br clear="both">
+  <div class="loading">Loading; one moment please…</div>
+</div>
+
+<footer>
+  about <a href="/">bl.ocks.org</a>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script>
+
+var formatDate = d3.time.format("%B %-d, %Y"),
+    parseDate = d3.time.format.iso.parse,
+    page = 0,
+    fetching,
+    id;
+
+display(null, [{"id":"467f1a0db47753cc630e","description":"Improved Circle Packing","created_at":"2015-09-15T17:43:20.000Z","updated_at":"2015-09-15T17:43:22.000Z"},{"id":"533daf20348023dfdd76","description":"Link Nodes by Name","created_at":"2015-09-15T04:08:46.000Z","updated_at":"2015-09-18T15:52:32.000Z"},{"id":"29c534ff0b270054a01c","description":"Smallest Enclosing Circle","created_at":"2015-08-05T18:04:35.000Z","updated_at":"2015-09-11T13:09:15.000Z"},{"id":"7115f7a0393de96f2fdc","description":"Apollonius’ Problem II","created_at":"2015-08-03T20:50:48.000Z","updated_at":"2015-09-08T18:07:37.000Z"},{"id":"751fdd637f4bc2e3f08b","description":"Apollonius’ Problem","created_at":"2015-08-03T19:05:52.000Z","updated_at":"2015-08-29T14:26:34.000Z"},{"id":"b75883984a032ea0ba26","description":"Colormaps","created_at":"2015-07-11T20:32:29.000Z","updated_at":"2015-08-29T14:24:42.000Z"},{"id":"85d7dce6fca6277f75fe","description":"Colorcomb II","created_at":"2015-07-10T00:29:44.000Z","updated_at":"2015-09-15T16:57:46.000Z"},{"id":"d1d81455dc21e10f742f","description":"Voronoi Circles","created_at":"2015-07-09T22:59:30.000Z","updated_at":"2015-08-29T14:24:35.000Z"},{"id":"1d127e44b53a3cbebe7b","description":"Delaunay Circles III","created_at":"2015-07-09T00:49:20.000Z","updated_at":"2015-08-29T14:24:31.000Z"},{"id":"4a21fbfe0d5cb6690ed4","description":"Delaunay Circles II","created_at":"2015-07-08T19:16:22.000Z","updated_at":"2015-08-29T14:24:30.000Z"},{"id":"e2ee1d2613a41ef85d6a","description":"Delaunay Circles","created_at":"2015-07-08T19:02:59.000Z","updated_at":"2015-08-29T14:24:30.000Z"},{"id":"76456029b13c68accf6e","description":"Voroblobinoids","created_at":"2015-07-08T00:51:16.000Z","updated_at":"2015-08-29T14:24:26.000Z"},{"id":"461a271f3fb3fb24a84f","description":"Monocomb","created_at":"2015-07-04T03:32:39.000Z","updated_at":"2015-08-29T14:24:13.000Z"},{"id":"615dfa9bf9b55878f7f6","description":"Colorcomb","created_at":"2015-07-03T15:47:05.000Z","updated_at":"2015-08-29T14:24:13.000Z"},{"id":"76342abc327062128604","description":"Color Mesh II","created_at":"2015-07-03T15:10:49.000Z","updated_at":"2015-08-30T08:51:21.000Z"},{"id":"99049112373e12709381","description":"Color Mesh","created_at":"2015-07-03T15:07:36.000Z","updated_at":"2015-08-29T14:24:13.000Z"},{"id":"ba63c55dd2dbc3ab0127","description":"This Is a Globe","created_at":"2015-07-03T05:23:22.000Z","updated_at":"2015-08-29T14:24:12.000Z"},{"id":"2fb85b77236c24be5a6f","description":"This Is Not a Globe","created_at":"2015-07-03T05:22:57.000Z","updated_at":"2015-09-23T20:13:52.000Z"},{"id":"280d83080497c8c13152","description":"Connected Particles III","created_at":"2015-06-26T05:20:17.000Z","updated_at":"2015-08-31T21:35:48.000Z"},{"id":"946ddf8a32b3b660ffd8","description":"Canvas Bar Chart","created_at":"2015-06-23T22:42:45.000Z","updated_at":"2015-08-29T14:23:35.000Z"},{"id":"8ca036b3505121279daf","description":"Quantile Choropleth","created_at":"2015-06-22T23:49:35.000Z","updated_at":"2015-08-29T14:23:29.000Z"},{"id":"f6a3a2265a0c510acd80","description":"Connected Particles II","created_at":"2015-06-09T18:14:33.000Z","updated_at":"2015-08-29T14:22:48.000Z"},{"id":"157333662ef11c151080","description":"Connected Particles","created_at":"2015-06-09T15:08:02.000Z","updated_at":"2015-08-29T14:22:45.000Z"},{"id":"ba8d75e45794c27168b5","description":"Cubehelix Color Picker","created_at":"2015-06-08T04:20:01.000Z","updated_at":"2015-09-19T19:46:29.000Z"},{"id":"debaad4fcce9bcee14cf","description":"HSL Color Picker","created_at":"2015-06-08T02:34:59.000Z","updated_at":"2015-08-29T14:22:40.000Z"},{"id":"3e115519a1b495e0bd95","description":"HCL Color Picker","created_at":"2015-06-08T00:52:49.000Z","updated_at":"2015-08-29T14:22:40.000Z"},{"id":"9f37cc207c0cb166921b","description":"Lab Color Picker","created_at":"2015-06-08T00:49:14.000Z","updated_at":"2015-08-29T14:22:40.000Z"},{"id":"78d64ca7ef013b4dcf8f","description":"RGB Color Picker","created_at":"2015-06-08T00:45:23.000Z","updated_at":"2015-08-29T14:22:40.000Z"},{"id":"248bac3b8e354a9103c4","description":"Easing Functions IV","created_at":"2015-06-07T20:53:03.000Z","updated_at":"2015-08-29T14:22:39.000Z"},{"id":"15082a2b405cb85a3fb6","description":"Cubehelix Interpolation II","created_at":"2015-06-07T05:18:44.000Z","updated_at":"2015-08-29T14:22:38.000Z"}])
+
+d3.select(window)
+    .on("scroll", maybeFetch)
+    .on("resize", maybeFetch);
+
+function maybeFetch() {
+  if (!fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
+    ++page;
+    fetch();
+  }
+}
+
+function fetch() {
+  fetching = true;
+  d3.json("/" + encodeURIComponent("mbostock") + "/" + page + ".json" + (id ? "?" + id : ""), display);
+}
+
+function display(error, gists) {
+  fetching = false;
+
+  if (!gists.length) {
+    page = NaN;
+    d3.select(".loading").remove();
+    return;
+  }
+
+  gists.forEach(function(d) {
+    d.created_at = parseDate(d.created_at);
+    d.updated_at = parseDate(d.updated_at);
+  });
+
+  var gistEnter = d3.select(".gists").selectAll(".gist")
+      .data(gists, function(d) { return d.id; })
+    .enter().insert("a", "br")
+      .attr("class", "gist")
+      .attr("href", function(d) { return "/mbostock/" + d.id; })
+      .style("background-image", function(d) { return "url(/mbostock/raw/" + d.id + "/thumbnail.png)"; });
+
+  gistEnter.append("span")
+      .attr("class", "description")
+      .text(function(d) { return d.description || d.id; });
+
+  gistEnter.append("span")
+      .attr("class", "date")
+      .text(function(d) { return formatDate(d.created_at); });
+
+  d3.select(".gists").selectAll(".gist")
+      .sort(function(a, b) { return b.created_at - a.created_at; });
+
+  id = gists[gists.length - 1].id;
+  setTimeout(maybeFetch, 50);
+}
+
+</script>
