@@ -121,11 +121,15 @@ def checkTheInputs():
                 if os.path.isfile(existingReadMe):
                     with open(existingReadMe, "r") as rdmeFile:
                         for lineCount, line in enumerate(rdmeFile):
-                            if '### Version' in line: chngLogTrigger = True
+                            if '### Version' in line:
+                                chngLogTrigger = True
+                                if not prevVersions[-1] == versions[0]:
+                                    existingChangeLog.append(line.split('###')[-1])
                             elif '### Tags' in line: chngLogTrigger = False
                             elif chngLogTrigger == True:
-                                if '###' in line: existingChangeLog.append(line.split('###')[-1])
-                                else: existingChangeLog.append(line)
+                                if not prevVersions[-1] == versions[0]:
+                                    if '###' in line: existingChangeLog.append(line.split('###')[-1])
+                                    else: existingChangeLog.append(line)
                 
                 if prevVersions[-1] == versions[0]:
                     #The user is just trying to re-commit their current version.
@@ -212,7 +216,7 @@ def writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath):
     return zipFilePath
 
 
-def writeReadMe(fileName, fileDescription, repoTargetFolder, existingChangeLog, gitUserName, fileTags):
+def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, existingChangeLog, gitUserName, fileTags):
     readMeFilePath = repoTargetFolder + '\\' + 'README.md'
     
     #Write the description.
@@ -220,9 +224,11 @@ def writeReadMe(fileName, fileDescription, repoTargetFolder, existingChangeLog, 
     readMeFile.write('### Description \n')
     for line in fileDescription:
         readMeFile.write(line + '\n')
+    readMeFile.write('\n')
     
     #Write in a link to the user's page and to the hydra page.
     readMeFile.write('This file has been submitted by [' + gitUserName + '](https://github.com/' + gitUserName + ')')
+    readMeFile.write('\n')
     readMeFile.write('\n')
     readMeFile.write('[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?owner=' + gitUserName + '&description=' + fileName + ')')
     readMeFile.write('\n')
@@ -239,13 +245,14 @@ def writeReadMe(fileName, fileDescription, repoTargetFolder, existingChangeLog, 
     
     #Write in the file tags.
     readMeFile.write('### Tags \n')
-    for line in fileTags:
-        readMeFile.write(line + ', ')
+    for linecount, line in enumerate(fileTags):
+        if linecount+1 != len(fileTags): readMeFile.write(line + ', ')
+        else: readMeFile.write(line)
     readMeFile.write('\n')
     
     #Write in a link to the thumbnail.
     readMeFile.write('### Thumbnail \n')
-    readMeFile.write("https://raw.githubusercontent.com/" + gitUserName + "/hydra/master/" + fileName + "/thumbnail.png")
+    readMeFile.write("(https://raw.githubusercontent.com/" + gitUserName + "/hydra/master/" + fileName + "/thumbnail.png)")
     readMeFile.write('\n')
     
     readMeFile.close()
@@ -435,7 +442,7 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
     ghFile = writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath)
     
     #Write the readMe into a text file.
-    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, existingChangeLog, gitUserName, fileTags)
+    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog_, existingChangeLog, gitUserName, fileTags)
     
     #Get all of the components on the canvass and pull out their information so that they can be written into a metadata file.
     ghComps = getAllTheComponents(document)
@@ -456,7 +463,7 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
     rhImg.Dispose()
     thumbnailImg.Dispose()
     
-    return ghFile, ghImgFile, descriptFile, metadataFile, chaneLogFilePath, thumbnailImgFile
+    return ghFile, ghImgFile, descriptFile, metadataFile, thumbnailImgFile
 
 
 
@@ -464,6 +471,6 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
 if _export and _fileName and len(_fileDescription) != 0 and _fileVersion:
     checkData, fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName = checkTheInputs()
     if checkData == True:
-        ghFile, ghImgFile, descriptFile, metadataFile, chaneLog, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName)
+        ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName)
 else:
     print "One of the mandatory inputs is missing!"
