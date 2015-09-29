@@ -127,9 +127,9 @@ def checkTheInputs():
                                     existingChangeLog.append(line.split('###')[-1])
                             elif '### Tags' in line: chngLogTrigger = False
                             elif chngLogTrigger == True:
-                                if not prevVersions[-1] == versions[0]:
-                                    if '###' in line: existingChangeLog.append(line.split('###')[-1])
-                                    else: existingChangeLog.append(line)
+                                if '###' in line: existingChangeLog.append(line.split('###')[-1])
+                                elif line == '\n': pass
+                                else: existingChangeLog.append(line)
                 
                 if prevVersions[-1] == versions[0]:
                     #The user is just trying to re-commit their current version.
@@ -252,7 +252,7 @@ def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, existing
     
     #Write in a link to the thumbnail.
     readMeFile.write('### Thumbnail \n')
-    readMeFile.write("(https://raw.githubusercontent.com/" + gitUserName + "/hydra/master/" + fileName + "/thumbnail.png)")
+    readMeFile.write("![Screenshot](https://raw.githubusercontent.com/" + gitUserName + "/hydra/master/" + fileName + "/thumbnail.png)")
     readMeFile.write('\n')
     
     readMeFile.close()
