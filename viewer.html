@@ -60,17 +60,20 @@ var example,
 	searchwkeywordbasepath = "https://hydrashare.github.io/hydra/index.html?keywords=";
 
 function parseUri(){
-	
+	// This function parses uri to find owner and project name/description
+	// and creates the base json object to generate the page
+
 	var inputParameters = {
 		owner : "",
-		description : ""
+		id : "",
+		fork: ""
 	}
 	
 	// parse Uri
 	var pars = window.location.search.replace("?","").split("&")
 	
 	if (pars[0]=="") {
-		alert("wrong address!");
+		alert("Can't find the file!");
 		return;
 	}
 
@@ -80,18 +83,19 @@ function parseUri(){
 	})
 
 	var owner = inputParameters.owner,
-		description = inputParameters.description;
+		fork = inputParameters.fork,
+		id = inputParameters.id;
 
 	// read the json file
-	var githubBase = "https://raw.githubusercontent.com/" + owner + "/hydra/master/" + description;
+	var githubBase = "https://raw.githubusercontent.com/" + owner + "/" + fork + "/master/" + id;
 	var jsonFile = githubBase + "/input.json";
                     
     d3.json(jsonFile, function(error, data){
     	// use the id to get the following github information
 		example = {
 			"owner": owner,
-			"description": description,
-			"fork_path": "http://www.github.com/" + owner + "/hydra/tree/master/" + description,
+			"description": id,
+			"fork_path": "http://www.github.com/" + owner + "/" + fork + "/tree/master/" + id,
 			"image_path": githubBase + "/" + data.ghimg,
 			"rhinoImage_path": githubBase + "/" + data.rhinoimg,
 			"download_path": githubBase + "/" + data.file,
@@ -105,6 +109,7 @@ function parseUri(){
 		generateContent(example);
     });
 };
+
 parseUri();
 
 function generateContent(){
@@ -131,7 +136,7 @@ function generateContent(){
 	header.append("a")
 	  .attr("href","https://hydrashare.github.io/hydra/index.html")
 	  .style("float","right")
-	  .text("Return to Hydra Main Page")
+	  .text("Return to Main Page")
 
 	// script for description
 	d3.select(".example-description").text(example.description.replace(/_/g, " "));
@@ -179,7 +184,7 @@ function generateContent(){
     // add change event to resort images
     d3.select("select").on("change", function(d) {
         version = d3.select(this).property("value");
-        console.log(version);
+        //console.log(version);
         // image, description and change log needs to be updated
     })
 

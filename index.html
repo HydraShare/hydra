@@ -74,8 +74,10 @@
             // find all the forks and member names
             data.forEach(function(d){
                 // add each member with url to their fork        
-                members[d.owner.login]= d.owner.html_url;
+                members[d.owner.login]= d.name;
             });
+            
+
             getContents(members, display);
         });
     };
@@ -87,7 +89,7 @@
         
         d3.keys(members).forEach(function(member, i){
 
-            basepath = "https://api.github.com/repos/" + member + "/Hydra/contents";
+            basepath = "https://api.github.com/repos/" + member + "/" + members[member] + "/contents";
 
             // get contents and collect trees and json objects inside folders
             // also add owner as the level 
@@ -98,14 +100,15 @@
                     if(content.type=="dir"){
                         
                         // parse folder contents and create path to json file
-                        var jsonFile = "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/input.json";
+                        var jsonFile = "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/input.json";
                         
                         d3.json(jsonFile, function(error, data){
                             var sample = {
                                 "owner" : member,
                                 "id": content.name,
+                                "fork": members[member],
                                 "created_at": parseDate(data.date),
-                                "thumbnail": "https://raw.githubusercontent.com/" + member + "/hydra/master/" + content.name + "/" + data.thumbnail,
+                                "thumbnail": "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/" + data.thumbnail,
                                 "tags": data.tags.concat(d3.keys(data.components)).join("").toLowerCase() + member.toLowerCase() + content.name.toLowerCase()
                             }
                             samplesData.push(sample);
@@ -141,7 +144,7 @@
           .data(examples)
         .enter().insert("a", "br")
           .attr("class", "example")
-          .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&description=" + d.id; })
+          .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&fork=" + d.fork + "&id=" + d.id; })
           .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
 
       exampleEnter.append("span")
