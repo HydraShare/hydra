@@ -136,55 +136,6 @@ function generateContent(){
 	// script for description
 	d3.select(".example-description").text(example.description.replace(/_/g, " "));
 
-	// script for tracking downloads
-	jQuery(document).ready(function( $ ) {
-		var request;
-		// bind the download submit event to the form
-		$("#example-download").submit(function(event){
-			//download the zip file from github
-			window.location = example.download_path;
-			
-			// abort any pending request
-			if (request) {  
-				request.abort();
-			}
-			
-			// setup some local variables
-			var $form = $(this);  		
-			var $inputs = $form.find("button");
-			$inputs.prop("disabled", true);
-			$('#downloadCount').text('#');		
-			data={"owner":example.owner,"description":example.description,"request_type":"increment"};
-			
-			// fire off the request to /form.php
-			request = $.ajax({
-				url: "https://script.google.com/macros/s/AKfycbxiRnl-119Qy-Ygchrjp5OiMelYUJCZ-ZHjpwKTm6dtaYCOZ9IZ/exec",
-				type: "post",
-				data: data
-			});
-			
-			// callback handler that will be called on success
-			request.done(function (response, textStatus, jqXHR){
-				// log a message to the console
-				$('#downloadCount').text(response.downloads);
-				console.log(response);
-			});
-			// callback handler that will be called on failure
-			request.fail(function (jqXHR, textStatus, errorThrown){
-				// log the error to the console
-				console.error("The following error occured: " + textStatus, errorThrown);
-			});
-			// callback handler that will be called regardless if the request failed or succeeded
-			request.always(function () {
-				// reenable the inputs
-				$inputs.prop("disabled", false);
-			});
-			
-			// prevent default posting of form
-			event.preventDefault();
-		});
-	});
-
 	// change toggle view between Rhino and Grasshopper
     d3.selectAll("input#toggleView")
       .on("change", toggleView)
