@@ -1,4 +1,4 @@
-# Hydra: A Plugin for example file sharing
+﻿# Hydra: A Plugin for example file sharing
 # 
 # This file is part of Hydra.
 
@@ -10,13 +10,13 @@ Provided by Hydra 0.0.01
 
     Args:
         _fileName: A text name for your example file.
-        _fileDescription: A text description of your example file.  This cn be a list and each item will be written as a new paragraph.
-        _fileVersion: A text input to set the version of your example file.  This becomes useful for keeping track of your files if this export is a new version of an old example file that you have already uploaded).  Examples for this input include '1.0', '0.1' or '0.0.01'.
+        _fileDescription: A text description of your example file.  This can be a list and each item will be written as a new paragraph.
         changeLog_: A text description of the changes that you have made to the file if this is a new version of an old example file.
         fileTags_: An optional list of test tags to decribe your example file.  This will help others search for your file easily.
         targetFolder_: Input a file path here to the hydra folder on you machine if you are not using the default Github structure that places your hydra github repo in your documents folder.
         includeRhino_: Set to 'True' to include the Rhino file in the zip file that gets uploaded to your hydra fork.  This is important if you are referencing Rhino geometry and have not internalized it in the GH document.  By default, this is set to 'False', which will only include the grasshopper file.
         GHForThumb_: Set to 'True' to have the thumbnail of your example file be of your GH canvas.  By default, the thumbnail will be of the Rhino scene since this is where the cool geometric output of the file displays.  If your file is not producing a geometric output, you will want to set this to 'True.'
+        additionalImgs_: A list of file paths to additional images that you want to be shown in Hydra page 
         _export: Set to "True" to export the Grasshopper file to Hydra.
     Returns:
         readMe!: ...
@@ -24,8 +24,8 @@ Provided by Hydra 0.0.01
 
 ghenv.Component.Name = "Hydra_ExportFile"
 ghenv.Component.NickName = 'exportHydra'
-ghenv.Component.Message = 'VER 0.0.01\nOCT_03_2015'
-ghenv.Component.Category = "Hydra"
+ghenv.Component.Message = 'VER 0.0.01\nOCT_04_2015'
+ghenv.Component.Category = "Extra"
 ghenv.Component.SubCategory = "Hydra"
 try: ghenv.Component.AdditionalHelpFromDocStrings = "1"
 except: pass
@@ -87,8 +87,7 @@ def checkTheInputs():
             fullForkTarget = hydraFolder
     
     
-    # Check the directory and create it if it does not exist.  If it does exist, it is, there is an old version of this example file and I should make a new directory.
-    versions = [_fileVersion.strip().replace(" ","_")]
+    # Check the directory and create it if it does not exist.  If it does exist, it is, there is not an old version of this example file and I should make a new directory.
     gitUserTrigger = False
     gitUserName = None
     forkName = None
@@ -110,26 +109,6 @@ def checkTheInputs():
             warning = "Could not find the config file in your Hydra fork on your system. \n Make sure that you have cloned hydra to your system. \n If you have cloned hydra, plug in the correct file path of the hydra repo to the targetFolder_ input on this component."
             print warning
             ghenv.Component.AddRuntimeMessage(w, warning)
-        
-        #Check if there is an existing version of this example file in the repo.
-        if not os.path.isdir(repoTargetFolder): os.mkdir(repoTargetFolder)
-        else:
-            existingJson = repoTargetFolder + '\\' + 'input.json'
-            existingReadMe = repoTargetFolder + '\\' + 'README.md'
-            if os.path.isfile(existingJson):
-                with open(existingJson, "r") as jsonFile:
-                    jsonDict = json.load(jsonFile)
-                prevVersions = jsonDict['versions']
-                
-                if prevVersions[-1] == versions[0]:
-                    #The user is just trying to re-commit their current version.
-                    versions = prevVersions
-                else:
-                    #The user is making a brand ndew version.
-                    versions = prevVersions + versions
-                comment = 'You have a previous version of this example file by this name and so a new version will be created.'
-                print comment
-            else: pass
     
     #Make a list of file tags that includes the example file name if nothing else is connected.
     if len(fileTags_) == 0:
@@ -143,7 +122,7 @@ def checkTheInputs():
     checkData3 = True
     document = ghenv.Component.OnPingDocument()
     doucumentPath = document.FilePath
-    if os.path.isfile(doucumentPath): pass
+    if doucumentPath!=None and os.path.isfile(doucumentPath): pass
     else:
         checkData3 = False
         warning = "You have not yet saved this Grasshopper file to your machine. \n You must save it first in order to export it to Hydra."
@@ -162,14 +141,14 @@ def checkTheInputs():
     else:
         comment = "You have not yet saved this Rhino file to your machine. \nYou will be able to use the 'includeRhino_' input to this component to include the rhino file with your example."
         print comment
-    
+        ghenv.Component.AddRuntimeMessage(c, comment)
     
     #Give a final check for everything.
     if checkData1 == True and checkData2 == True and checkData3 == True and checkData4 == True: checkData = True
     else: checkData = False
     
     
-    return checkData, fileName, _fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName
+    return checkData, fileName, _fileDescription, fileTags, repoTargetFolder, doucumentPath, document, rhinoDocPath, gitUserName, forkName
 
 
 def writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath):
@@ -228,8 +207,7 @@ def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, gitUserN
     readMeFile.write('[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?owner=' + gitUserName + '&fork=' + forkName + '&id=' + fileName + ')')
     readMeFile.write('\n')
     
-    # Write in the file version and change log.
-    readMeFile.write('### Version ' + _fileVersion + '\n')
+    # Write change log in the file
     if len(changeLog) != 0:
         for line in changeLog:
             readMeFile.write(line + '\n')
@@ -262,7 +240,7 @@ def getAllTheComponents(document, onlyGHPython = False):
     return components
 
 
-def getMetaData(ghComps, versions, fileTags, fileName, rhinoDocPath):
+def getMetaData(ghComps, fileTags, fileName, rhinoDocPath):
     #Create the dictionary.
     metaDataDict = {}
     
@@ -281,9 +259,6 @@ def getMetaData(ghComps, versions, fileTags, fileName, rhinoDocPath):
     #Put in a timestamp.
     dt = str(datetime.fromtimestamp(mktime(time.localtime())))
     metaDataDict['date'] = dt
-    
-    #Put in the correct versions.
-    metaDataDict['versions'] = versions
     
     #Put in tags.
     metaDataDict['tags'] = fileTags
@@ -428,7 +403,7 @@ def makeThunbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
     return thumbnailPath, fullImage
 
 
-def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName):
+def main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, document, rhinoDocPath, gitUserName, forkName):
     #Write the GH file into a GHX file.
     ghFile = writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath)
     
@@ -437,7 +412,7 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
     
     #Get all of the components on the canvass and pull out their information so that they can be written into a metadata file.
     ghComps = getAllTheComponents(document)
-    metaDataDict = getMetaData(ghComps, versions, fileTags, fileName, rhinoDocPath)
+    metaDataDict = getMetaData(ghComps, fileTags, fileName, rhinoDocPath)
     metadataFile = writeMetadataFile(fileName, repoTargetFolder, metaDataDict)
     
     #Take a high-res image of the grasshopper canvass.
@@ -459,9 +434,14 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
 
 
 
-if _export and _fileName and len(_fileDescription) != 0 and _fileVersion:
-    checkData, fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName = checkTheInputs()
-    if checkData == True:
-        ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName)
-else:
-    print "One of the mandatory inputs is missing!"
+if _export:
+    if _fileName and len(_fileDescription) != 0:
+        checkData, fileName, fileDescription, fileTags, repoTargetFolder, \
+            doucumentPath, document, rhinoDocPath, gitUserName, forkName = checkTheInputs()
+        
+        if checkData == True:
+            ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, document, rhinoDocPath, gitUserName, forkName)
+    else:
+        msg = "One of the mandatory inputs is missing!"
+        print msg
+        ghenv.Component.AddRuntimeMessage(gh.GH_RuntimeMessageLevel.Warning, msg)
