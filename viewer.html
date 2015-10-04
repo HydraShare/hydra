@@ -20,6 +20,15 @@
 		border: 2px solid #7192D8;
     	border-radius: 10px;
     }
+
+
+    div#imageContainer {
+    	margin: auto;
+    	display: block;
+    	border: 3px solid #000000;
+    	border-radius: 10px;
+    	padding: 10px;
+    }
     
     </style>
 </head>
@@ -190,25 +199,21 @@ function generateContent(){
 
 	// script for zooming and panning .png images
 	var imgWidth = 960,imgHeight = 480,		// Image dimensions (don't change these)
-	    width =  960, height = 480,         // Dimensions of cropped region
+	    width =  960, height = 480,        // Dimensions of cropped region
+	    padding = 10,
 	    translate0 = [0, 0], currentOffset = translate0,  // Initial offset 
 		scale0 = 1, currentZoom = scale0;   // Initial scale
 
 	svg = d3.select("#imageContainer").append("svg")
-	    .attr("width",  width + "px")
+	    .attr("width",  (width - (2 * padding)) + "px")
 	    .attr("height", height + "px");
 
-	svg.append("rect")
-	    .attr("class", "overlay")
-	    .attr("width", width + "px")
-	    .attr("height", height + "px");
-	
 	var zoom = d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom);
 	svg = svg.call(zoom)
 	  .append("g");
 
 	svg.append("image")
-	    .attr("width",  imgWidth + "px")
+	    .attr("width",  (imgWidth - (2 * padding)) + "px")
 	    .attr("height", imgHeight + "px")
 	    .attr("xlink:href", example.image_path);
 	
