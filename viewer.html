@@ -51,12 +51,11 @@
 	<span class='st_facebook_hcount' displayText='Facebook'></span>
 	<span class='st_twitter_hcount' displayText='Tweet'></span>
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
-	<span class='st_googleplus_hcount' displayText='Google +'></span>
-	
+	<span class='st_googleplus_hcount' displayText='Google +'></span>	
 	<!-- <select id="versions" style = "float:right"> </select> -->
-	
 	<button id="zoomtoextents" style="float:right" type="button">ZoomToExtent</button>
 </div>
+
 <br>
 <div id="imageContainer"></div>
 <div id="slideshow">
@@ -244,7 +243,7 @@ function generateContent(){
 		svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
 	}
 
-	d3.select("#zoomtoextents").on("click", zoomtoextents());
+	d3.select("#zoomtoextents").on("click", zoomtoextents);
 
 	// script for tags
 	d3.select(".example-tags").selectAll("a")
