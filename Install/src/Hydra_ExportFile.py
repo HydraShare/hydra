@@ -246,7 +246,7 @@ def getMetaData(ghComps, fileTags, fileName, rhinoDocPath, additionalImgs):
     
     #Get the names of all of the components on the canvas and add them to the dictionary.
     metaDataDict["components"] = {}
-    metaDataDict["images"] = {}
+    metaDataDict["images"] = []
     metaDataDict["videos"] = {}
     metaDataDict["dependencies"] = []
     
@@ -273,15 +273,15 @@ def getMetaData(ghComps, fileTags, fileName, rhinoDocPath, additionalImgs):
     metaDataDict['tags'] = fileTags
     
     # Put in the path to the gh scene image.
-    metaDataDict["images"][fileName + '_GH.png'] = "Grasshopper Definition"
+    metaDataDict["images"].append({fileName + '_GH.png' : "Grasshopper Definition"})
     
     # Put in the path to the rhino scene image.
-    metaDataDict["images"][fileName + '_Rhino.png'] = "Rhino Viewport Screenshot"
+    metaDataDict["images"].append({fileName + '_Rhino.png' : "Rhino Viewport Screenshot"})
     
     # add additional images to image list; at some point we should expose adding description for each image
     for img in additionalImgs:
         if os.path.isfile(img):
-            metaDataDict["images"][os.path.split(img)[1]] = "Additional Image"
+            metaDataDict["images"].append({os.path.split(img)[1] : "Additional Image"})
     
     # Put in the path to the thumbnail file.
     metaDataDict['thumbnail'] = 'thumbnail.png'
