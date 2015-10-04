@@ -29,6 +29,11 @@
     	border-radius: 10px;
     	padding: 10px;
     }
+
+    div#slideshow{
+    	margin: 0 auto;
+    	text-align: center;
+    }
     
     </style>
 </head>
@@ -43,17 +48,19 @@
 	<span class='st_twitter_hcount' displayText='Tweet'></span>
 	<span class='st_linkedin_hcount' displayText='LinkedIn'></span>
 	<span class='st_googleplus_hcount' displayText='Google +'></span>
+	
 	<select id="versions" style = "float:right"> </select>
 	<button id="zoomtoextents" style="float:right" type="button">ZoomToExtent</button>
 </div>
-<hr>
-
+<br>
 <div id="imageContainer"></div>
+<div id="slideshow">
+	<label><input type="radio" id="toggleView" name="viewMode" value="GH" title="image1" checked></label> <!-- show 2D image on load-->
+    <label><input type="radio" id="toggleView" name="viewMode" value="RH"></label>
+</div>
 <br>
 <form id="example-download">
 	<button type="submit">Download</button>
-	<label><input type="radio" id="toggleView" name="viewMode" value="GH" checked> GH</label> <!-- show 2D image on load-->
-    <label><input type="radio" id="toggleView" name="viewMode" value="RH"> RH</label>
 	<div class="example-tags" style="float: right"></div>
 </form>
 <br>
@@ -157,6 +164,8 @@ function generateContent(){
     function toggleView() {
 
         var selectedView = this.value;
+		
+		zoomtoextents();
 
         if (selectedView=="RH"){
         	// check for rhino image
@@ -205,15 +214,16 @@ function generateContent(){
 		scale0 = 1, currentZoom = scale0;   // Initial scale
 
 	svg = d3.select("#imageContainer").append("svg")
-	    .attr("width",  (width - (2 * padding)) + "px")
+	    .attr("width",  (width - (2.5 * padding)) + "px")
 	    .attr("height", height + "px");
 
 	var zoom = d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoom);
+	
 	svg = svg.call(zoom)
 	  .append("g");
 
 	svg.append("image")
-	    .attr("width",  (imgWidth - (2 * padding)) + "px")
+	    .attr("width",  (imgWidth - (2.5 * padding)) + "px")
 	    .attr("height", imgHeight + "px")
 	    .attr("xlink:href", example.image_path);
 	
@@ -221,10 +231,12 @@ function generateContent(){
 	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 	};
 	
-	d3.select("#zoomtoextents").on("click", function(){
+	function zoomtoextents(){
 		svg.call(zoom.scale(1).translate([0,0]));
 		svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
-	});
+	}
+
+	d3.select("#zoomtoextents").on("click", zoomtoextents());
 
 	// script for tags
 	d3.select(".example-tags").selectAll("a")
