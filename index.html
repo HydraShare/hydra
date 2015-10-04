@@ -107,7 +107,7 @@
                                 "owner" : member,
                                 "id": content.name,
                                 "fork": members[member],
-                                "created_at": parseDate(data.date),
+                                //"created_at": parseDate(data.date),
                                 "thumbnail": "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/" + data.thumbnail,
                                 "tags": data.tags.concat(d3.keys(data.components)).join("").toLowerCase() + member.toLowerCase() + content.name.toLowerCase()
                             }
@@ -135,10 +135,13 @@
         return;
       }
 
+      
+      /* temporary removed - will be uncommented once the versioning is connected to github
       examples.forEach(function(d) {
         d.created_at = parseDate(d.created_at);
         d.updated_at = parseDate(d.created_at);
       });
+      */
 
       var exampleEnter = d3.select(".examples").selectAll(".example")
           .data(examples)
@@ -151,10 +154,12 @@
           .attr("class", "description")
           .text(function(d) { return d.id.replace(/_/g, " "); });
 
+      /* temporary removed - will be uncommented once the versioning is connected to github
       exampleEnter.append("span")
           .attr("class", "date")
           .text(function(d) { return formatDate(d.created_at); });
-
+        */
+      
       d3.select(".loading").remove();
     }
 
