@@ -6,7 +6,7 @@
 """
 Use this component to export your GH file to your Hydra repository so that you can upload and share with the community!
 -
-Provided by Hydra 0.0.01
+Provided by Hydra 0.0.02
 
     Args:
         _fileName: A text name for your example file.
@@ -24,7 +24,7 @@ Provided by Hydra 0.0.01
 
 ghenv.Component.Name = "Hydra_ExportFile"
 ghenv.Component.NickName = 'exportHydra'
-ghenv.Component.Message = 'VER 0.0.01\nOCT_04_2015'
+ghenv.Component.Message = 'VER 0.0.02\nOCT_04_2015'
 ghenv.Component.Category = "Extra"
 ghenv.Component.SubCategory = "Hydra"
 try: ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -240,13 +240,18 @@ def getAllTheComponents(document, onlyGHPython = False):
     return components
 
 
-def getMetaData(ghComps, fileTags, fileName, rhinoDocPath):
+def getMetaData(ghComps, fileTags, fileName, rhinoDocPath, additionalImgs):
     #Create the dictionary.
     metaDataDict = {}
     
     #Get the names of all of the components on the canvas and add them to the dictionary.
     metaDataDict["components"] = {}
-    notImportantComps = ['Hydra_ExportFile', 'Hydra_ImportFile', 'Group', 'Panel', 'Slider', 'Boolean Toggle', 'Custom Preview', 'Colour Swatch','Button', 'Control Knob', 'Digit Scroller', 'MD Slider', 'Value List', 'Point', 'Vector', 'Circle', 'Circular Arc', 'Curve', 'Line', 'Plane', 'Rectangle', 'Box', 'Mesh', 'Mesh Face', 'Surface', 'Twisted Box', 'Field', 'Geometry', 'Geometry Cache', 'Geometry Pipeline', 'Transform']
+    metaDataDict["images"] = {}
+    metaDataDict["videos"] = {}
+    metaDataDict["dependencies"] = []
+    
+    grasshopperNative = ['Params', 'Maths', 'Sets', 'Vector', 'Curve', 'Surface', 'Mesh', 'Intersect', 'Transform', 'Display', 'Hydra']
+    notImportantComps = ['Hydra', 'Scribble', 'Hydra_ExportFile', 'Hydra_ImportFile', 'Group', 'Panel', 'Slider', 'Boolean Toggle', 'Custom Preview', 'Colour Swatch','Button', 'Control Knob', 'Digit Scroller', 'MD Slider', 'Value List', 'Point', 'Vector', 'Circle', 'Circular Arc', 'Curve', 'Line', 'Plane', 'Rectangle', 'Box', 'Mesh', 'Mesh Face', 'Surface', 'Twisted Box', 'Field', 'Geometry', 'Geometry Cache', 'Geometry Pipeline', 'Transform']
     
     for component in ghComps:
         componentName = component.Name
@@ -255,19 +260,28 @@ def getMetaData(ghComps, fileTags, fileName, rhinoDocPath):
             metaDataDict["components"][componentName] += 1
         else:
             metaDataDict["components"][componentName] = 1
-    
-    #Put in a timestamp.
-    dt = str(datetime.fromtimestamp(mktime(time.localtime())))
-    metaDataDict['date'] = dt
-    
+        
+        # find dependencies
+        componentCategory = component.Category
+        if componentCategory == "Extra" or componentCategory == "User":
+                componentCategory = component.SubCategory
+                
+        if componentCategory not in grasshopperNative + metaDataDict["dependencies"]:
+            metaDataDict["dependencies"].append(componentCategory)
+            
     #Put in tags.
     metaDataDict['tags'] = fileTags
     
     # Put in the path to the gh scene image.
-    metaDataDict['ghimg'] = fileName + '_GH.png'
+    metaDataDict["images"][fileName + '_GH.png'] = "Grasshopper Definition"
     
     # Put in the path to the rhino scene image.
-    metaDataDict['rhinoimg'] = fileName + '_Rhino.png'
+    metaDataDict["images"][fileName + '_Rhino.png'] = "Rhino Viewport Screenshot"
+    
+    # add additional images to image list; at some point we should expose adding description for each image
+    for img in additionalImgs:
+        if os.path.isfile(img):
+            metaDataDict["images"][os.path.split(img)[1]] = "Additional Image"
     
     # Put in the path to the thumbnail file.
     metaDataDict['thumbnail'] = 'thumbnail.png'
@@ -376,6 +390,18 @@ def writeRhinoImage(fileName, repoTargetFolder):
     
     return fullPath, pic, image_w, image_h
 
+def copyAddiationalImages(additionalImgs, repoTargetFolder):
+    
+    for img in additionalImgs:
+        #chek if the file already exist
+        if os.path.isfile(img):
+            # copy to the file to the folder
+            try:
+                shutil.copyfile(img, repoTargetFolder + '\\' + os.path.split(img)[1])
+            except:
+               msg = "Failed to copy " + img
+               print msg
+
 def makeThunbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
     #Set universal variables.
     thumbnailPath = repoTargetFolder + '\\' + 'thumbnail.png'
@@ -403,17 +429,10 @@ def makeThunbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
     return thumbnailPath, fullImage
 
 
-def main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, document, rhinoDocPath, gitUserName, forkName):
+def main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, \
+        document, rhinoDocPath, gitUserName, forkName, additionalImgs):
     #Write the GH file into a GHX file.
     ghFile = writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath)
-    
-    #Write the readMe into a text file.
-    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog_, gitUserName, fileTags, forkName)
-    
-    #Get all of the components on the canvass and pull out their information so that they can be written into a metadata file.
-    ghComps = getAllTheComponents(document)
-    metaDataDict = getMetaData(ghComps, fileTags, fileName, rhinoDocPath)
-    metadataFile = writeMetadataFile(fileName, repoTargetFolder, metaDataDict)
     
     #Take a high-res image of the grasshopper canvass.
     ghImgFile, ghImg, gw, gh = writeGHImage(fileName, repoTargetFolder)
@@ -427,10 +446,18 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, d
     #Clear the images from the computer memory.
     ghImg.Dispose()
     rhImg.Dispose()
-    thumbnailImg.Dispose()
+    thumbnailImg.Dispose()    
     
-    return ghFile, ghImgFile, descriptFile, metadataFile, thumbnailImgFile
-
+    #Copy additional images to folder if any
+    copyAddiationalImages(additionalImgs, repoTargetFolder)
+    
+    #Write the readMe into a text file.
+    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog_, gitUserName, fileTags, forkName)
+    
+    #Get all of the components on the canvass and pull out their information so that they can be written into a metadata file.
+    ghComps = getAllTheComponents(document)
+    metaDataDict = getMetaData(ghComps, fileTags, fileName, rhinoDocPath, additionalImgs)
+    metadataFile = writeMetadataFile(fileName, repoTargetFolder, metaDataDict)
 
 
 
@@ -440,7 +467,9 @@ if _export:
             doucumentPath, document, rhinoDocPath, gitUserName, forkName = checkTheInputs()
         
         if checkData == True:
-            ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, document, rhinoDocPath, gitUserName, forkName)
+            main(fileName, fileDescription, fileTags, repoTargetFolder, \
+                doucumentPath, document, rhinoDocPath, gitUserName, \
+                forkName, additionalImgs_)
     else:
         msg = "One of the mandatory inputs is missing!"
         print msg
