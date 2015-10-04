@@ -24,7 +24,7 @@ Provided by Hydra 0.0.01
 
 ghenv.Component.Name = "Hydra_ExportFile"
 ghenv.Component.NickName = 'exportHydra'
-ghenv.Component.Message = 'VER 0.0.01\nSEP_29_2015'
+ghenv.Component.Message = 'VER 0.0.01\nOCT_03_2015'
 ghenv.Component.Category = "Hydra"
 ghenv.Component.SubCategory = "Hydra"
 try: ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -71,11 +71,15 @@ def checkTheInputs():
                 repoTargetFolder = targetFolder_ + '\\' + fileName
                 fullForkTarget = targetFolder_ + '\\'
     else:
+        hydraFolder = None
         username = os.getenv("USERNAME")
-        hydraFolder = "C:\\Users\\" + username + "\\Documents\\GitHub\\hydra\\"
+        githubDirectory = "C:\\Users\\" + username + "\\Documents\\GitHub\\"
+        for file in os.listdir(githubDirectory):
+            if 'hydra' in file: hydraFolder = githubDirectory + file + "\\"
+        if hydraFolder == None: hydraFolder = "C:\\Users\\" + username + "\\Documents\\GitHub\\hydra\\"
         if not os.path.isdir(hydraFolder):
             checkData1 = False
-            warning = "There does not appear to be a hydra repo on your machine. \n Make sure that you have cloned hydra to your system. \n If you have cloned hydra, plug in the correct file path of the hydra repo to the targetFolder_ input on this component."
+            warning = "The component cannot automatically find the hydra repo on your machine. \n Plug in the correct file path of the hydra repo to the targetFolder_ input on this component."
             print warning
             ghenv.Component.AddRuntimeMessage(w, warning)
         else:
@@ -85,10 +89,9 @@ def checkTheInputs():
     
     # Check the directory and create it if it does not exist.  If it does exist, it is, there is an old version of this example file and I should make a new directory.
     versions = [_fileVersion.strip().replace(" ","_")]
-    existingChangeLog = []
-    chngLogTrigger = False
     gitUserTrigger = False
     gitUserName = None
+    forkName = None
     checkData2 = True
     if repoTargetFolder != None:
         
@@ -99,7 +102,8 @@ def checkTheInputs():
                 for lineCount, line in enumerate(cnfFile):
                     if '[remote "origin"]' in line: gitUserTrigger = True
                     elif gitUserTrigger == True and 'https://github.com/' in line:
-                        gitUserName = line.split('https://github.com/')[-1].split('/hydra.git')[0]
+                        gitUserName = line.split('https://github.com/')[-1].split('/')[0]
+                        forkName = line.split('/')[-1].split('.git')[0]
                         gitUserTrigger = False
         else:
             checkData2 = False
@@ -116,20 +120,6 @@ def checkTheInputs():
                 with open(existingJson, "r") as jsonFile:
                     jsonDict = json.load(jsonFile)
                 prevVersions = jsonDict['versions']
-                
-                #Pull out the existing changelog
-                if os.path.isfile(existingReadMe):
-                    with open(existingReadMe, "r") as rdmeFile:
-                        for lineCount, line in enumerate(rdmeFile):
-                            if '### Version' in line:
-                                chngLogTrigger = True
-                                if not prevVersions[-1] == versions[0]:
-                                    existingChangeLog.append(line.split('###')[-1])
-                            elif '### Tags' in line: chngLogTrigger = False
-                            elif chngLogTrigger == True:
-                                if '###' in line: existingChangeLog.append(line.split('###')[-1])
-                                elif line == '\n': pass
-                                else: existingChangeLog.append(line)
                 
                 if prevVersions[-1] == versions[0]:
                     #The user is just trying to re-commit their current version.
@@ -161,20 +151,25 @@ def checkTheInputs():
         ghenv.Component.AddRuntimeMessage(w, warning)
     
     #Check to be sure that the user has saved this currently open Rhino file so that we can copy it.
+    checkData4 = True
     rhinoDocPath = rc.RhinoDoc.ActiveDoc.Path
     if os.path.isfile(rhinoDocPath): pass
+    elif not os.path.isfile(rhinoDocPath) and includeRhino_ == True:
+        checkData4 = False
+        warning = "You must save your Rhino file in order to export it to Hydra. \nEither save your file or set 'includeRhino_' to 'False'."
+        print warning
+        ghenv.Component.AddRuntimeMessage(w, warning)
     else:
         comment = "You have not yet saved this Rhino file to your machine. \nYou will be able to use the 'includeRhino_' input to this component to include the rhino file with your example."
         print comment
-        ghenv.Component.AddRuntimeMessage(c, comment)
     
     
     #Give a final check for everything.
-    if checkData1 == True and checkData2 == True and checkData3 == True: checkData = True
+    if checkData1 == True and checkData2 == True and checkData3 == True and checkData4 == True: checkData = True
     else: checkData = False
     
     
-    return checkData, fileName, _fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName
+    return checkData, fileName, _fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName
 
 
 def writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath):
@@ -216,7 +211,7 @@ def writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath):
     return zipFilePath
 
 
-def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, existingChangeLog, gitUserName, fileTags):
+def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, gitUserName, fileTags, forkName):
     readMeFilePath = repoTargetFolder + '\\' + 'README.md'
     
     #Write the description.
@@ -230,17 +225,13 @@ def writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog, existing
     readMeFile.write('This file has been submitted by [' + gitUserName + '](https://github.com/' + gitUserName + ')')
     readMeFile.write('\n')
     readMeFile.write('\n')
-    readMeFile.write('[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?owner=' + gitUserName + '&description=' + fileName + ')')
+    readMeFile.write('[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?owner=' + gitUserName + '&fork=' + forkName + '&id=' + fileName + ')')
     readMeFile.write('\n')
     
     # Write in the file version and change log.
     readMeFile.write('### Version ' + _fileVersion + '\n')
     if len(changeLog) != 0:
         for line in changeLog:
-            readMeFile.write(line + '\n')
-    
-    if len(existingChangeLog) != 0:
-        for line in existingChangeLog:
             readMeFile.write(line + '\n')
     
     #Write in the file tags.
@@ -437,12 +428,12 @@ def makeThunbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
     return thumbnailPath, fullImage
 
 
-def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName):
+def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName):
     #Write the GH file into a GHX file.
     ghFile = writeGHRhino(fileName, repoTargetFolder, doucumentPath, rhinoDocPath)
     
     #Write the readMe into a text file.
-    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog_, existingChangeLog, gitUserName, fileTags)
+    descriptFile = writeReadMe(fileName, fileDescription, repoTargetFolder, changeLog_, gitUserName, fileTags, forkName)
     
     #Get all of the components on the canvass and pull out their information so that they can be written into a metadata file.
     ghComps = getAllTheComponents(document)
@@ -469,8 +460,8 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucum
 
 
 if _export and _fileName and len(_fileDescription) != 0 and _fileVersion:
-    checkData, fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName = checkTheInputs()
+    checkData, fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName = checkTheInputs()
     if checkData == True:
-        ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, existingChangeLog, gitUserName)
+        ghFile, ghImgFile, descriptFile, metadataFile, thumbnail = main(fileName, fileDescription, fileTags, repoTargetFolder, versions, doucumentPath, document, rhinoDocPath, gitUserName, forkName)
 else:
     print "One of the mandatory inputs is missing!"
