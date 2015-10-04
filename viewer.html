@@ -17,8 +17,12 @@
 	<style type="text/css">
 	
 	span.components {
-		border: 2px solid #7192D8;
-    	border-radius: 10px;
+		border: 2px solid #BDC0C7;
+    	border-radius: 5px;
+    	margin: 3px;
+	    padding: 2px;
+	    display: inline-block;
+    	font-size: .9em;
     }
 
 
@@ -268,7 +272,7 @@ function generateContent(){
     	.enter()
     		.append("span")
     		.attr("class", "components")
-    		.text(function(d){return " " + example.components[d] + "X" + d +"; "})
+    		.text(function(d){return " " + example.components[d] + " X " + d + " "})
 }
 </script>
 
