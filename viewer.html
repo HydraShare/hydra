@@ -45,6 +45,10 @@
     	margin: 0 auto;
     	text-align: center;
     }
+
+    button{
+    	cursor: pointer;
+    }
     
     </style>
 </head>
@@ -73,7 +77,7 @@
 </div>
 <br>
 <form id="example-download">
-	<button type="submit">Download</button>
+	<button id="downloadButton" type="button">Download</button>
 	<div class="example-tags" style="float: right"></div>
 </form>
 <br>
@@ -182,8 +186,15 @@ function generateContent(){
 	// script for description
 	d3.select(".example-description").text(example.description.replace(/_/g, " "));
 
+	 
+	// bind the download submit event to the form
+	d3.select("button#downloadButton")
+		.on("click", function(){
+		//download the zip file from github
+		window.location = example.download_path;
+		});
+
 	// change toggle view between images
-	
 	// add lable for each image in image list
 	d3.select("#slideshow")
 		.selectAll("lable")
