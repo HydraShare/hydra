@@ -32,7 +32,7 @@
 	</div>
 
 <script type="text/javascript">
-    
+
     // read all the available example files
     var formatDate = d3.time.format("%B %-d, %Y"),
         parseDate = d3.time.format.iso.parse,
@@ -44,14 +44,14 @@
     // read uri
 
     function parseUri(){
-    
+
         var inputParameters = {
             keywords : []
         }
-        
+
         // parse Uri
         var pars = window.location.search.replace("?","").split("&")
-        
+
         if (pars[0]=="")return;
 
         pars.forEach(function(d){
@@ -66,17 +66,17 @@
 
     function getSamples(){
         var members = {};
-		
+
         // here is a json object of all Hydra forks
         var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
 
         d3.json(forks, function(error, data){
             // find all the forks and member names
             data.forEach(function(d){
-                // add each member with url to their fork        
+                // add each member with url to their fork
                 members[d.owner.login]= d.name;
             });
-            
+
 
             getContents(members, display);
         });
@@ -86,22 +86,22 @@
 
         var samplesData = [];
         var basepath;
-        
+
         d3.keys(members).forEach(function(member, i){
 
             basepath = "https://api.github.com/repos/" + member + "/" + members[member] + "/contents";
 
             // get contents and collect trees and json objects inside folders
-            // also add owner as the level 
+            // also add owner as the level
             d3.json(basepath, function(error, contents){
                 // find all the forks and member names
                 contents.forEach(function(content, j){
-                    // add each member with url to their fork        
+                    // add each member with url to their fork
                     if(content.type=="dir"){
-                        
+
                         // parse folder contents and create path to json file
                         var jsonFile = "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/input.json";
-                        
+
                         d3.json(jsonFile, function(error, data){
                             var sample = {
                                 "owner" : member,
@@ -120,7 +120,7 @@
                         });
                     }
                 });
-            });            
+            });
         });
     }
 
@@ -135,7 +135,7 @@
         return;
       }
 
-      
+
       /* temporary removed - will be uncommented once the versioning is connected to github
       examples.forEach(function(d) {
         d.created_at = parseDate(d.created_at);
@@ -159,18 +159,22 @@
           .attr("class", "date")
           .text(function(d) { return formatDate(d.created_at); });
         */
-      
+
       d3.select(".loading").remove();
     }
 
 	// script to filter examples
+  // Turns out that FireFox doesn't accept inline functions
+  // on("click", filter(getKeywords())) won't work in FireFox
     d3.select("#filterButton")
-        .on("click", filter(getKeywords()));
+        .on("click", function(){
+            filter(getKeywords())
+          });
 
 
-    d3.select('#filtering').on("keypress", function(e){
-        if (!e) e = window.event;
-        if (e.keyCode == '13') filter(getKeywords());
+    d3.select('#filtering').on("keypress", function(){
+        var keyCode =d3.event.keyCode;
+        if (keyCode == '13') filter(getKeywords());
       });
 
     function getKeywords(){
@@ -178,10 +182,10 @@
     }
 
     function filter(keywords){
-        
+
         // visibility: hidden; position: fixed
         var exampledivs = d3.selectAll(".example");
-        
+
         // turn everything on
         exampledivs.style("visibility","visible")
             .style("position","");
@@ -199,7 +203,7 @@
             }
             isIncluded[d.id] = false;
         });
-        
+
        exampledivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
             .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
     }
