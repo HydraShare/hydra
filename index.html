@@ -58,11 +58,17 @@
             keyValue = d.split("=");
             inputParameters[keyValue[0].toLowerCase()].push(decodeURIComponent(keyValue[1]));
         })
-
+        
         keywords = inputParameters.keywords;
     }
 
     parseUri();
+
+    // update value in text box
+    if (keywords.length != 0){
+        // d3 equivalent didn't work!
+        document.getElementById("filtering").value = keywords.join(", ");
+    }
 
     function getSamples(){
         var members = {};
