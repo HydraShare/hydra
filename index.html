@@ -56,7 +56,7 @@
 
         pars.forEach(function(d){
             keyValue = d.split("=");
-            inputParameters[keyValue[0].toLowerCase()].push(keyValue[1]);
+            inputParameters[keyValue[0].toLowerCase()].push(decodeURIComponent(keyValue[1]));
         })
 
         keywords = inputParameters.keywords;
