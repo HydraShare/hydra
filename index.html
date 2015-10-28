@@ -9,23 +9,44 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta charset="utf-8">
-	<title>Hydra - Sharing platform for Grasshopper and Dynamo users</title>
-	<link rel="icon" type="image/x-icon" href="./lib/favicon.ico">
-	<link rel="stylesheet" type="text/css" href="./lib/style.css">
+	<title>Hydra - Sharing made easy!</title>
+	  <link rel="icon" type="image/x-icon" href="./lib/favicon.ico">
+	  <link rel="stylesheet" type="text/css" href="./lib/style.css">
+    <script type="text/javascript" src="https://ajax.cloudflare.com/cdn-cgi/nexp/dok3v=919620257c/cloudflare.min.js"></script>
+    <script src="./lib/jquery-1.11.3.min.js"></script>
     <script src="./lib/d3.min.js"></script>
+    <script src="./lib/hydra.js"></script>
 </head>
 
 <body>
 	<header>
-		<p>Inspired by <a href="http://bl.ocks.org/">bl.ocks.org</a></p>
-		<p>Do you want to share your files with the world? <a href="https://github.com/HydraShare/hydra/wiki">Read here. We made it very easy for you.</a></p>
+		<div>
+      Inspired by <a href="http://bl.ocks.org/">bl.ocks.org</a>
+		  <span style="float:right">
+        Read
+        <a href="https://github.com/HydraShare/hydra#hydra" target="_blank"> Hydra's story </a>
+        and
+        <a href="https://github.com/HydraShare/hydra/wiki" target="_blank"> how to share Hydras!</a>
+      </span>
+    </div>
 	</header>
-	<h2 class="user-login" title="Click on images for more information">Welcome to Hydra! Click on images for more information
-		<span style="float:right">
-			<input type="text" id="filtering" placeholder="username, component name,&hellip;">
-			<button id="filterButton" type="button">Filter!</button>
+	<h2 class="user-login" title="Click on images to see the details and download the files...">
+    Welcome to Hydra! <span id="last_updated" style="font-size: .45em; font-weight: normal;"></span>
+    <span style="float:right">
+			<input type="text" id="filtering" placeholder="username, component name,&hellip;" title="Filter the results by username, component name or keywords. Separate words by ,">
+      <select>
+        <option value="created_at">Newest</option>
+        <option value="modified_at">Last updated</option>
+        <option value="id">A-Z</option>
+        <!--
+        <option value="downloads">most downloaded</option>
+        <option value="most_visited">most visited</option>
+        <option value="best_rated">best rated</option>
+        -->
+      </select>
 		</span>
 	</h2>
+
 	<div class="examples">
 	  <br clear="both">
 	  <div class="loading">Loading; one moment please...</div>
@@ -36,33 +57,16 @@
     // read all the available example files
     var formatDate = d3.time.format("%B %-d, %Y"),
         parseDate = d3.time.format.iso.parse,
+        sortBy = "created_at",
         page = 0,
+        objectPerPage = 24, // number of objects to be loaded per page
+        keywords = [],
+        visibility = [], // 0-1 values for visibility after filtering
         fetching,
-        id,
-        keywords = [];
+        data;
 
-    // read uri
-
-    function parseUri(){
-
-        var inputParameters = {
-            keywords : []
-        }
-
-        // parse Uri
-        var pars = window.location.search.replace("?","").split("&")
-
-        if (pars[0]=="")return;
-
-        pars.forEach(function(d){
-            keyValue = d.split("=");
-            inputParameters[keyValue[0].toLowerCase()].push(decodeURIComponent(keyValue[1]));
-        })
-        
-        keywords = inputParameters.keywords;
-    }
-
-    parseUri();
+    // parse Uri to get the keywords onload
+    var keywords = parseUri();
 
     // update value in text box
     if (keywords.length != 0){
@@ -70,149 +74,75 @@
         document.getElementById("filtering").value = keywords.join(", ");
     }
 
-    function getSamples(){
-        var members = {};
+    // This call loads Hydras - get the Hydras from googlesheets
+    // filters them based on keywords
+    // and draws the for in the first page
+    jQuery(document).ready(loadHydras());
 
-        // here is a json object of all Hydra forks
-        var forks = "https://api.github.com/repos/HydraShare/Hydra/forks";
+    // I'm copying these lines from Mike's code at http://bl.ocks.org/
+    d3.select(window)
+      .on("scroll", maybeFetch)
+      .on("resize", maybeFetch);
 
-        d3.json(forks, function(error, data){
-            // find all the forks and member names
-            data.forEach(function(d){
-                // add each member with url to their fork
-                members[d.owner.login]= d.name;
-            });
-
-
-            getContents(members, display);
-        });
-    };
-
-    function getContents(members, display){
-
-        var samplesData = [];
-        var basepath;
-
-        d3.keys(members).forEach(function(member, i){
-
-            basepath = "https://api.github.com/repos/" + member + "/" + members[member] + "/contents";
-
-            // get contents and collect trees and json objects inside folders
-            // also add owner as the level
-            d3.json(basepath, function(error, contents){
-                // find all the forks and member names
-                contents.forEach(function(content, j){
-                    // add each member with url to their fork
-                    if(content.type=="dir"){
-
-                        // parse folder contents and create path to json file
-                        var jsonFile = "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/input.json";
-
-                        d3.json(jsonFile, function(error, data){
-                            var sample = {
-                                "owner" : member,
-                                "id": content.name,
-                                "fork": members[member],
-                                //"created_at": parseDate(data.date),
-                                "thumbnail": "https://raw.githubusercontent.com/" + member + "/" +  members[member] + "/master/" + content.name + "/" + data.thumbnail,
-                                "tags": data.tags.concat(d3.keys(data.components)).join("").toLowerCase() + member.toLowerCase() + content.name.toLowerCase()
-                            }
-                            samplesData.push(sample);
-                            // I couldn't get the call back to work and that's why this is here!
-                            // It needs to be changed later!
-                            display(samplesData);
-                            // in case user passed a keyword in uri
-                            filter(keywords);
-                        });
-                    }
-                });
-            });
-        });
-    }
-
-    getSamples();
-
-    function display(examples) {
-      fetching = false;
-
-      if (!examples.length) {
-        page = NaN;
-        d3.select(".loading").remove();
-        return;
+    function maybeFetch() {
+      if (!fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
+          fetch();
+        }
       }
 
+    function fetch() {
+      fetching = true;
+      display(null, filter());
+    }
 
-      /* temporary removed - will be uncommented once the versioning is connected to github
-      examples.forEach(function(d) {
-        d.created_at = parseDate(d.created_at);
-        d.updated_at = parseDate(d.created_at);
-      });
-      */
+    function display(error, data) {
+      fetching = false;
+
+      if (data.length < objectPerPage * (page -1)) {
+          // it's all already loaded to the page
+          page = -1;
+          d3.select(".loading").text("");
+          return;
+      }
+
+      // remove divs on filter - not the best practice but works for now
+      if (page == 0) d3.select(".examples").selectAll(".example").remove();
+
+      ++page;
 
       var exampleEnter = d3.select(".examples").selectAll(".example")
-          .data(examples)
+          .data(data)
         .enter().insert("a", "br")
           .attr("class", "example")
-          .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&fork=" + d.fork + "&id=" + d.id; })
-          .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
+          .attr("title", function(d) {return "By " + d.owner + " <" + d.created_at + ">";})
+          .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&fork=" + d.fork + "&id=" + encodeURIComponent(d.id); })
+            .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
 
       exampleEnter.append("span")
           .attr("class", "description")
           .text(function(d) { return d.id.replace(/_/g, " "); });
 
-      /* temporary removed - will be uncommented once the versioning is connected to github
       exampleEnter.append("span")
           .attr("class", "date")
-          .text(function(d) { return formatDate(d.created_at); });
-        */
+          .text(function(d) { return d.created_at; });
 
-      d3.select(".loading").remove();
+      sortHydras(sortBy);
+      setTimeout(maybeFetch, 50);
     }
 
-	// script to filter examples
-  // Turns out that FireFox doesn't accept inline functions
-  // on("click", filter(getKeywords())) won't work in FireFox
-    d3.select("#filterButton")
-        .on("click", function(){
-            filter(getKeywords())
+    // add add sort functionality
+    d3.select("select").on("change", function() {
+          sortBy = d3.select(this).property("value");
+          sortHydras(sortBy);
           });
-
 
     d3.select('#filtering').on("keypress", function(){
         var keyCode =d3.event.keyCode;
-        if (keyCode == '13') filter(getKeywords());
+        if (keyCode == '13') {
+          page = 0; // starting over
+          display(null, filter());
+        }
       });
-
-    function getKeywords(){
-        return d3.select("#filtering").node().value.split(",");
-    }
-
-    function filter(keywords){
-
-        // visibility: hidden; position: fixed
-        var exampledivs = d3.selectAll(".example");
-
-        // turn everything on
-        exampledivs.style("visibility","visible")
-            .style("position","");
-
-        if (keywords.length==0 || (keywords.length==1 & keywords[0]=="")) return; // no keyword!
-
-
-        // map the values
-        var isIncluded = {};
-
-        exampledivs.data().map(function(d){
-            for (var i=0; i<keywords.length; i++){
-                if (d.tags.includes(keywords[i].toLowerCase())) isIncluded[d.id] = true;
-                return;
-            }
-            isIncluded[d.id] = false;
-        });
-
-       exampledivs.style("visibility", function(d){ return isIncluded[d.id]? "visible":"hidden"})
-            .style("position", function(d){ return isIncluded[d.id]? "":"fixed"});
-    }
 
 </script>
 </body>
