@@ -24,7 +24,7 @@ Provided by Hydra 0.0.02
 
 ghenv.Component.Name = "Hydra_ExportFile"
 ghenv.Component.NickName = 'exportHydra'
-ghenv.Component.Message = 'VER 0.0.02\nOCT_04_2015'
+ghenv.Component.Message = 'VER 0.0.02\nNOV_18_2015'
 ghenv.Component.Category = "Extra"
 ghenv.Component.SubCategory = "Hydra"
 try: ghenv.Component.AdditionalHelpFromDocStrings = "1"
@@ -115,8 +115,20 @@ def checkTheInputs():
         fileTags = []
         for word in _fileName.split(' '):
             fileTags.append(word)
+    elif len(fileTags_) == 1 and ',' in fileTags_[0]:
+        fileTags = fileTags_[0].split(',')
+    elif len(fileTags_) == 1 and ';' in fileTags_[0]:
+        fileTags = fileTags_[0].split(';')
+    elif len(fileTags_) == 1:
+        fileTags = fileTags_[0].split('\n')
     else:
         fileTags = fileTags_
+    
+    if not 'Grasshopper' in fileTags and \
+       not 'grasshopper' in fileTags:
+        fileTags.append('Grasshopper')
+    
+    fileTags = [tag.strip() for tag in fileTags]
     
     #Check to be sure that the user has saved this currently open GH file so that we can copy it.
     checkData3 = True
@@ -276,7 +288,8 @@ def getMetaData(ghComps, fileTags, fileName, rhinoDocPath, additionalImgs):
     metaDataDict["images"].append({fileName + '_GH.png' : "Grasshopper Definition"})
     
     # Put in the path to the rhino scene image.
-    metaDataDict["images"].append({fileName + '_Rhino.png' : "Rhino Viewport Screenshot"})
+    if not GHForThumb_:
+        metaDataDict["images"].append({fileName + '_Rhino.png' : "Rhino Viewport Screenshot"})
     
     # add additional images to image list; at some point we should expose adding description for each image
     for img in additionalImgs:
@@ -402,7 +415,7 @@ def copyAddiationalImages(additionalImgs, repoTargetFolder):
                msg = "Failed to copy " + img
                print msg
 
-def makeThunbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
+def makeThumbnailImg(ghImgFile, rhinoImgFile, gw, gh, rw, rh, repoTargetFolder):
     #Set universal variables.
     thumbnailPath = repoTargetFolder + '\\' + 'thumbnail.png'
     thumbnailW = 200
@@ -438,14 +451,18 @@ def main(fileName, fileDescription, fileTags, repoTargetFolder, doucumentPath, \
     ghImgFile, ghImg, gw, gh = writeGHImage(fileName, repoTargetFolder)
     
     #Take an image of the Rhino scene
-    rhinoImgFile, rhImg, rw, rh = writeRhinoImage(fileName, repoTargetFolder)
-    
+    if not GHForThumb_:
+        rhinoImgFile, rhImg, rw, rh = writeRhinoImage(fileName, repoTargetFolder)
+    else:
+        rhImg, rw, rh = "", 1, 1
+        
     #Make a thumbnail image.
-    thumbnailImgFile, thumbnailImg = makeThunbnailImg(ghImg, rhImg, gw, gh, rw, rh, repoTargetFolder)
+    thumbnailImgFile, thumbnailImg = makeThumbnailImg(ghImg, rhImg, gw, gh, rw, rh, repoTargetFolder)
     
     #Clear the images from the computer memory.
     ghImg.Dispose()
-    rhImg.Dispose()
+    if not GHForThumb_:
+        rhImg.Dispose()
     thumbnailImg.Dispose()    
     
     #Copy additional images to folder if any
