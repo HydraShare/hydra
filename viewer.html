@@ -348,6 +348,7 @@ function generateContent(){
 	function zoomtoextents(){
 		svg.call(zoom.scale(1).translate([0,0]));
 		svg.attr("transform", "translate(0,0)scale(1)");
+		replaceState(1, [0,0]);
 	}
 
 	function initialzoom(){
