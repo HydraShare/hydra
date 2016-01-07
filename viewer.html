@@ -92,7 +92,11 @@
 
 <script data-cfasync="false" type="text/javascript">
 var example,
-	searchwkeywordbasepath = "https://hydrashare.github.io/hydra/index.html?keywords=";
+	searchwkeywordbasepath = "https://hydrashare.github.io/hydra/index.html?keywords=",
+	scale = 1, // current zoom
+	offset = "0,0",
+	slide = 0; // current offset from the center default is 0,0
+
 
 function parseUri(){
 	// This function parses uri to find owner and project name/description
@@ -101,7 +105,10 @@ function parseUri(){
 	var inputParameters = {
 		owner : "",
 		id : "",
-		fork: ""
+		fork: "",
+		scale: 1, 
+		offset: "0,0",
+		slide: 0
 	}
 
 	// parse Uri
@@ -120,6 +127,10 @@ function parseUri(){
 	var owner = inputParameters.owner,
 		fork = inputParameters.fork,
 		id = inputParameters.id;
+	
+	scale = inputParameters.scale;
+	offset = inputParameters.offset.split(",");
+	slide = inputParameters.slide;
 
 	// read the json file
 	var githubBase = "https://raw.githubusercontent.com/" + owner + "/" + fork + "/master/" + id;
@@ -160,6 +171,7 @@ function parseUri(){
 				"githubBase": githubBase,
 				"owner": owner,
 				"description": id,
+				"fork": fork,
 				"fork_path": "http://www.github.com/" + owner + "/" + fork + "/tree/master/" + id,
 				"images": data.images,
 				"download_path": githubBase + "/" + data.file,
@@ -244,7 +256,7 @@ function generateContent(){
 				.attr("id", "toggleView")
 				.attr("name", "viewMode")
 				.attr("title", function(d){return d3.values(d)[0];})
-				.property("checked", function(d, i){ return i==0;}); // check the first one
+				.property("checked", function(d, i){ return i==slide;}); // check the one that matches the slide number
 
     d3.selectAll("input#toggleView")
       .on("change", toggleView)
@@ -252,11 +264,17 @@ function generateContent(){
     function toggleView() {
 
         var imageName = d3.keys(d3.select(this).data()[0])[0];
+        
 
-		zoomtoextents();
-
+        // update state based on number of slide
+		slide = example.images.map(function(d){ return d3.keys(d)[0]}).indexOf(imageName);
+		
+		pushState(slide);
+		
     	svg.select("image")
     		.attr("xlink:href", function(d){ return example.githubBase + "/" + imageName;});
+		
+		zoomtoextents();
     }
 
 	/*
@@ -282,11 +300,11 @@ function generateContent(){
 	*/
 
 	// script for zooming and panning .png images
-	var imgWidth = 960,imgHeight = 480,		// Image dimensions (don't change these)
+	var imgWidth = 960, imgHeight = 480,		// Image dimensions (don't change these)
 	    width =  960, height = 480,        // Dimensions of cropped region
 	    padding = 10,
-	    translate0 = [0, 0], currentOffset = translate0,  // Initial offset
-		scale0 = 1, currentZoom = scale0;   // Initial scale
+	    translate0 = offset,
+		scale0 = scale;
 
 	svg = d3.select("#imageContainer").append("svg")
 	    .attr("width",  (width - (2.5 * padding)) + "px")
@@ -300,17 +318,46 @@ function generateContent(){
 	svg.append("image")
 	    .attr("width",  (imgWidth - (2.5 * padding)) + "px")
 	    .attr("height", imgHeight + "px")
-	    .attr("xlink:href", function(){ return example.githubBase + "/" + d3.keys(example.images[0])[0]});
+	    .attr("xlink:href", function(){ return example.githubBase + "/" + d3.keys(example.images[slide])[0]});
+
+	function pushState(slide){
+		// update global variables
+		slide = slide;
+
+		var newState = "/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
+		"&offset=" + offset.join(",");
+
+		history.pushState(null, null, newState);
+	}
+
+	function replaceState(scale, offset){
+		// update global variables
+		scale = scale;
+		offset = offset;
+		var newState = "/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
+		"&offset=" + offset.join(",");
+
+		history.replaceState(null, null, newState);
+	}
 
 	function zoom() {
-	  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+	 	svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		replaceState(d3.event.scale, d3.event.translate);	  
 	};
 
 	function zoomtoextents(){
 		svg.call(zoom.scale(1).translate([0,0]));
-		svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")")
+		svg.attr("transform", "translate(0,0)scale(1)");
 	}
 
+	function initialzoom(){
+		svg.call(zoom.scale(scale0).translate(translate0));
+		svg.attr("transform", "translate(" + translate0 + ")scale(" + scale0 + ")");
+		replaceState(scale0, translate0);	  
+	}
+	
+	initialzoom();
+	
 	d3.select("#zoomtoextents").on("click", zoomtoextents);
 
 	// script for tags
