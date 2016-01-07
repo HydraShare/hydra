@@ -324,7 +324,7 @@ function generateContent(){
 		// update global variables
 		slide = slide;
 
-		var newState = "/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
+		var newState = "/hydra/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
 		"&offset=" + offset.join(",");
 
 		history.pushState(null, null, newState);
@@ -334,7 +334,7 @@ function generateContent(){
 		// update global variables
 		scale = scale;
 		offset = offset;
-		var newState = "/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
+		var newState = "/hydra/viewer?owner=" + example.owner + "&fork=" + example.fork + "&id=" + example.description + "&slide=" + slide + "&scale=" + scale + 
 		"&offset=" + offset.join(",");
 
 		history.replaceState(null, null, newState);
