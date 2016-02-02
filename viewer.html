@@ -40,6 +40,12 @@
     	padding: 10px;
     }
 
+   div#videoContainer {
+    	margin: auto;
+    	display: block;
+    	padding: 10px;
+    }
+
     div#slideshow{
     	margin: 0 auto;
     	text-align: center;
@@ -74,6 +80,7 @@
     <label><input type="radio" id="toggleView" name="viewMode" value="RH"></label>
     -->
 </div>
+<div id="videoContainer"></div>
 <br>
 <form id="example-download">
 	<button id="downloadButton" type="button">Download</button>
@@ -112,14 +119,14 @@ function parseUri(){
 	}
 
 	// parse Uri
-	var pars = window.location.search.replace("?","").split("&")
+	var parse = window.location.search.replace("?","").split("&")
 
-	if (pars[0]=="") {
+	if (parse[0]=="") {
 		alert("Can't find the file!");
 		return;
 	}
 
-	pars.forEach(function(d){
+	parse.forEach(function(d){
 		keyValue = d.split("=");
 		inputParameters[keyValue[0].toLowerCase()] = decodeURIComponent(keyValue[1]);
 	})
@@ -174,6 +181,7 @@ function parseUri(){
 				"fork": fork,
 				"fork_path": "http://www.github.com/" + owner + "/" + fork + "/tree/master/" + id,
 				"images": data.images,
+				"videos": data.videos,
 				"download_path": githubBase + "/" + data.file,
 				"readme_path": githubBase + "/README.md",
 				"components": data.components,
@@ -319,6 +327,20 @@ function generateContent(){
 	    .attr("width",  (imgWidth - (2.5 * padding)) + "px")
 	    .attr("height", imgHeight + "px")
 	    .attr("xlink:href", function(){ return example.githubBase + "/" + d3.keys(example.images[slide])[0]});
+
+	if (typeof example.videos === 'object'){
+		d3.select("#videoContainer")
+			.selectAll("iframe")
+				.data(example.videos)
+				.enter()
+					.append("iframe")
+				    .attr("width",  (width - (2.5 * padding)) + "px")
+				    .attr("height", height + "px")
+				    .attr("src", function(d){ return d3.keys(d)[0];})
+				    .attr("title", function(d){ return d3.values(d)[0];})
+				    .attr("frameborder", "0");
+				    //.property("allowfullscreen");
+	}
 
 	function pushState(slide){
 		// update global variables
