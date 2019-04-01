@@ -7,5 +7,5 @@ This file has been submitted by [HydraShare](https://github.com/HydraShare)
 ### Tags 
 radiation, daylight, peak, annual, Grasshopper
 ### Thumbnail 
-![Screenshot](https://raw.githubusercontent.com/HydraShare/hydra/peak_annual_radiation/thumbnail.png)
+![Screenshot](hydra/Peak_annul_radiation/thumbnail.png)
 
