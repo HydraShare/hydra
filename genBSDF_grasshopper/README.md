@@ -1,19 +1,11 @@
-### Description
-Create BSDF files for multiphase simulations through this file
+### Description 
+A file to do genBSDF files directly through grasshopper.
+requires openstudio installed in c:\openstudio-2.4.0
 
-Please check [Andy McNeil's tutorial on genBSDF](https://www.radiance-online.org/learning/tutorials/Tutorial-genBSDF_v1.0.1.pdf) before using this file!
+This file has been submitted by [Sonderwoods](https://github.com/Sonderwoods)
 
-And his [5-phase tutorial.](https://www.radiance-online.org/learning/tutorials/fivephasetutorialfiles/Tutorial-FivePhaseMethod_v2.pdf)
-And let's not forget [Sarith's multiphase tutorial.](https://www.radiance-online.org/learning/tutorials/matrix-based-methods)
-
-### Radiance parameters
-Set -ab and -ad correctly. The -ad 10 in the example is just to do a quick test.
-Should be > 1024, perhaps much higher depending on geometry.
-
-This file has been submitted by [HydraShare](https://github.com/HydraShare)
-
-[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?fork=hydra&id=genBSDF_grasshopper)
-### Tags
-radiation, daylight, BSDF, annual, Grasshopper, genBSDF
-### Thumbnail
-![Screenshot](https://raw.githubusercontent.com/HydraShare/hydra/master/peak_annual_radiation/thumbnail.png)
+[Check out this example on Hydra!](http://hydrashare.github.io/hydra/viewer?owner=Sonderwoods&fork=hydra&id=genBSDF)
+### Tags 
+genBSDF, BSDF, radiance, honeybee, multiphase, klems, tensor, tensortree, Grasshopper
+### Thumbnail 
+![Screenshot](https://raw.githubusercontent.com/Sonderwoods/hydra/master/genBSDF/thumbnail.png)
