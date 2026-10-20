@@ -117,7 +117,7 @@
           .attr("class", "example")
           .attr("title", function(d) {return "By " + d.owner + " <" + d.created_at + ">";})
           .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&fork=" + d.fork + "&id=" + encodeURIComponent(d.id); })
-            .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
+          .attr("data-thumbnail", function(d) { return d.thumbnail; });
 
       exampleEnter.append("span")
           .attr("class", "description")
@@ -127,7 +127,26 @@
           .attr("class", "date")
           .text(function(d) { return d.created_at; });
 
+      exampleEnter.each(function() { loadThumbnailWhenVisible(this); });
+
       setTimeout(maybeFetch, 50);
+    }
+
+    // thumbnails are big GitHub downloads, so only fetch one when its card is near the screen
+    var thumbnailObserver = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.style.backgroundImage = "url(" + entry.target.getAttribute("data-thumbnail") + ")";
+        thumbnailObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "200px" }) : null;
+
+    function loadThumbnailWhenVisible(element) {
+      if (thumbnailObserver) {
+        thumbnailObserver.observe(element);
+      } else {
+        element.style.backgroundImage = "url(" + element.getAttribute("data-thumbnail") + ")";
+      }
     }
 
     // add add sort functionality

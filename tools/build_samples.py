@@ -112,7 +112,7 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
     index = {"last_updated": now.isoformat(), "samples": samples}
     with open(OUT, "w", encoding="utf-8") as out:
-        json.dump(index, out, indent=1)
+        json.dump(index, out, separators=(",", ":"))
     print("wrote %d examples from %d forks to %s" % (len(samples), len(forks), os.path.normpath(OUT)))
 
 
