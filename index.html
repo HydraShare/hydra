@@ -77,7 +77,7 @@
     // This call loads Hydras - get the Hydras from googlesheets
     // filters them based on keywords
     // and draws the for in the first page
-    jQuery(document).ready(loadHydras());
+    jQuery(document).ready(loadHydras);
 
     // I'm copying these lines from Mike's code at http://bl.ocks.org/
     d3.select(window)
@@ -85,7 +85,8 @@
       .on("resize", maybeFetch);
 
     function maybeFetch() {
-      if (!fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
+      // wait until the index has loaded, otherwise filter() has nothing to show
+      if (examples && !fetching && page >= 0 && d3.select(".loading").node().getBoundingClientRect().top < innerHeight) {
           fetch();
         }
       }
@@ -116,7 +117,7 @@
           .attr("class", "example")
           .attr("title", function(d) {return "By " + d.owner + " <" + d.created_at + ">";})
           .attr("href", function(d) { return "http://hydrashare.github.io/hydra/viewer?owner=" + d.owner + "&fork=" + d.fork + "&id=" + encodeURIComponent(d.id); })
-            .style("background-image", function(d) { return "url(" + d.thumbnail + ")";});
+          .attr("data-thumbnail", function(d) { return d.thumbnail; });
 
       exampleEnter.append("span")
           .attr("class", "description")
@@ -126,7 +127,26 @@
           .attr("class", "date")
           .text(function(d) { return d.created_at; });
 
+      exampleEnter.each(function() { loadThumbnailWhenVisible(this); });
+
       setTimeout(maybeFetch, 50);
+    }
+
+    // thumbnails are big GitHub downloads, so only fetch one when its card is near the screen
+    var thumbnailObserver = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.style.backgroundImage = "url(" + entry.target.getAttribute("data-thumbnail") + ")";
+        thumbnailObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "200px" }) : null;
+
+    function loadThumbnailWhenVisible(element) {
+      if (thumbnailObserver) {
+        thumbnailObserver.observe(element);
+      } else {
+        element.style.backgroundImage = "url(" + element.getAttribute("data-thumbnail") + ")";
+      }
     }
 
     // add add sort functionality
